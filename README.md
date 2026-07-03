@@ -113,6 +113,14 @@ Yes, you will complile on main.cpp
 
 ## Real talk...
 This is a personal hobby project not made for any assignment at all and gotta say, it was fun!
-I will not put any licensing on this project, at least in the short term future
+I will not put any licensing on this project, at least in the short term future, meaning: All rights reserved
 That being said please do not distribute the code or game without my consent and credit for me, still
 =D
+
+
+# APENDIX
+***You can stop reading from here... or not, idk your choice***  
+
+## FUTURE CHANGES
+Centralize command parsing and pass arguments into functions instead of handing the argument parsing responsibility to the functions itself.
+Generally improve quality of error messages
