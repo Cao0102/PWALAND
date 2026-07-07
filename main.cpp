@@ -14,7 +14,7 @@
 #include <format>
 #include <ranges>
 #include <cassert>
-#include <sstream>
+#include <charconv>
 
 namespace sc {
     constexpr auto cmd = "Commands";
@@ -106,7 +106,21 @@ namespace util {
     long long calc_fed_cost(int herdsz) {
         return meta.getlvl() + herdsz*5 - std::min(meta.getpwa()/50000, (long long) herdsz*3);
     }
-
+    std::expected<int, std::string> str_to_num(std::string str) {
+        int value;
+        auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value);
+        if (ec == std::errc::invalid_argument)
+            return std::unexpected("Pwa? Isn't this supposed to be... a numbber?\n");
+        if (ec == std::errc::result_out_of_range || value >= 10000) 
+            return std::unexpected("Pwa... big number...\n");
+        if (value < 0)
+            return std::unexpected("But pwa no learn negative numbers!\n");
+        if (value == 0)
+            return std::unexpected("Pwa why would you do something 0 times?\n");
+        if (ptr != str.data() + str.size())
+            return std::unexpected("Tricky owner sneak trailing characters!\n");
+        return value;
+    }
 }
 
 class Achievements {
@@ -124,7 +138,7 @@ public:
     ) : name(std::move(n)),
         des(std::move(d)),
         cond(std::move(c)) {};
-    
+
     int check() {
         if (completed) return 2;
         for (auto& c : cond) if (!(c())) return 0;
@@ -579,7 +593,7 @@ class Alpaca {
         for (auto& nows_your_chance : shot) {
             sum += nows_your_chance.perc;
             if (sum > destiny) {
-                std::cout << name << " is very happy pwa! You got " << nows_your_chance.pwam << " pwas and " 
+                std::cout << name << " is very happy pwa! You got " << nows_your_chance.pwam << " pwas and "
                 << nows_your_chance.expm << " xp!" << '\n';
                 pwatimes += nows_your_chance.pwam;
                 xp += nows_your_chance.expm;
@@ -666,8 +680,8 @@ class Alpaca {
 
 class command_system {
 public:
-    using Command = std::function<std::expected<void, std::string>()>;
-private: 
+    using Command = std::function<std::expected<void, std::string>(std::vector<std::string>& args)>;
+private:
     std::unordered_map<std::string, Command> commands;
 public:
     void add(std::string name, Command command) {
@@ -680,19 +694,49 @@ public:
         else return &it->second;
     }
 
-    std::expected<void, std::string> run(std::string& name) {
-        auto check = find(name);
-        if (!check) {
-            meta.logfail();
-            return std::unexpected("No such command exist!\n");
+    std::expected<std::vector<std::string>, std::string> parse(std::string& cmd) {
+        //ignores all spaces, supports quoted strings
+        if (cmd.empty()) return std::unexpected("\'Mpty line PWA!\n");
+        std::vector<std::string> a;
+        std::string cur;
+        bool iQuoted = false;
+        a.reserve(10);
+        for (char c : cmd) {
+            if (iQuoted) {
+                if (c == '"') {
+                    iQuoted = false; 
+                    a.push_back(cur); 
+                    cur.clear();
+                    if (a.size() > 10) return std::unexpected("Hey! PWA DIZZY! TOO MANY ARGUMENTS\n");
+                    continue;
+                }
+                cur.push_back(c);
+                continue;
+            }
+            if (c == '"') {iQuoted = true; continue;}
+            if (c == ' ' && !cur.empty()) {
+                a.push_back(cur);
+                cur.clear();
+                if (a.size() > 10) return std::unexpected("Hey! PWA DIZZY! TOO MANY ARGUMENTS\n");
+            }
+            else if (c != ' ') cur.push_back(c);
         }
-        auto res = (*check)();
-        if (!res) {
-            meta.logfail();
-            return std::unexpected(res.error());
-        }
+        if (!cur.empty()) a.push_back(cur);
+        if (a.size() > 10) return std::unexpected("Hey! PWA DIZZY! TOO MANY ARGUMENTS\n");
+        return a;
+    }
+
+    std::expected<void, std::string> run(std::string& cmd) {
+        auto parseres = parse(cmd);
+        if (!parseres) return std::unexpected(parseres.error());
+        auto& args = parseres.value();
+        auto check = find(args[0]);
+        if (!check) return std::unexpected("No such command exist!\n");
+        auto cmdrun = *check;
+        auto res = cmdrun(args);
+        if (!res) return std::unexpected(res.error());
         meta.logcmd("ALL");
-        meta.logcmd(name);
+        meta.logcmd(args[0]);
         return {};
     }
 };
@@ -706,7 +750,7 @@ public:
         if (it == pwaherd.end()) return nullptr;
         return &it->second;
     }
-    
+
     void addpwa (const std::string name) {
         pwaherd.try_emplace(name, (name));
     }
@@ -737,7 +781,7 @@ public:
             );
         }
     }
-    
+
     void savepwa(std::ofstream& out) {
         for (auto& [name, alpaca] : pwaherd) {
             alpaca.savepwa(out);
@@ -751,7 +795,8 @@ public:
 
 command_system cmdres(herd& pwaherd) {
     command_system cmdsys;
-    cmdsys.add("HLP", []() -> std::expected<void, std::string> {
+    cmdsys.add("HLP", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
+        if (args.size() != 1) return std::unexpected(std::format("Expected 0 argumments, got {}\n", args.size()-1));
         std::cout << '\n' << "COMMANDS GUIDE" << '\n'
         << "----------------------------------"
         << '\n' << "1. General commands" << '\n'
@@ -763,7 +808,7 @@ command_system cmdres(herd& pwaherd) {
         << '\n' << "2. Player information" << '\n'
         << "BAL - Show your pwacoin balance!" << '\n'
         << "ACH - Show all achievements" << '\n'
-        << "AIF - View information on a specific achievement" << '\n'
+        << "AIF \"<name>\" - View information on a specific achievement" << '\n'
         << '\n' << "3. Alpaca interactions" << '\n'
         << "INF <name> - Show information on your alpaca" << '\n'
         << "FED <name> <amount> - Feed the alpacas, may they pwa more and be well fed" << '\n'
@@ -776,13 +821,15 @@ command_system cmdres(herd& pwaherd) {
         return {};
     });
 
-    cmdsys.add("MTD", []() -> std::expected<void, std::string> {
+    cmdsys.add("MTD", [](std::vector<std::string>& args) -> std::expected<void, std::string> {
+        if (args.size() != 1) return std::unexpected(std::format("Expected 0 arguments, got {}\n", args.size()-1));
         meta.listout();
         return {};
     });
 
 
-    cmdsys.add("FAQ", []() -> std::expected<void, std::string> {
+    cmdsys.add("FAQ", [](std::vector<std::string>& args) -> std::expected<void, std::string> {
+        if (args.size() != 1) return std::unexpected(std::format("Expected 0 arguments, got {}\n", args.size()-1));
         std::cout << '\n' << "FAQ" << '\n'
         << "Q: Why is my command not fully interpreted, what does invalid amount type mean?" << '\n'
         << "A: This means either that your command is missing or giving more than the required "
@@ -814,7 +861,8 @@ command_system cmdres(herd& pwaherd) {
         return {};
     });
 
-    cmdsys.add("JGL", []() -> std::expected<void, std::string> {
+    cmdsys.add("JGL", [](std::vector<std::string>& args) -> std::expected<void, std::string> {
+        if (args.size() != 1) return std::unexpected(std::format("Expected 0 arguments, got {}\n", args.size()-1));
         struct v_log {
             int large_v;
             int small_v;
@@ -829,7 +877,7 @@ command_system cmdres(herd& pwaherd) {
                 "... implementation 5!"
             }
         };
-        
+
         for (auto& log : changelogs) {
             std::cout << std::format("\n{}: Version {}.{}\n{}", log.date, log.large_v, log.small_v, log.contents);
         }
@@ -837,19 +885,15 @@ command_system cmdres(herd& pwaherd) {
         return {};
     });
 
-    cmdsys.add("FED", [&]() -> std::expected<void, std::string> {
-        std::string targetname;
-        std::cin >> targetname;
+    cmdsys.add("FED", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
+        if (args.size() != 3) return std::unexpected(std::format("Expected 2 arguments, got {}\n", args.size()-1));
+        std::string& targetname = args[1];
         Alpaca* pwatarg = pwaherd.findpwa(targetname);
         if (!pwatarg) return std::unexpected("No such alpaca pwa\n");
 
-        int amount;
-        if (!(std::cin >> amount)) {
-            return std::unexpected (
-                "Invalid amount type\n This could also be that the command has the wrong format, refer to FAQ\n"
-            );
-        }
-        if (amount <= 0 || amount >= (int)1e5) return std::unexpected("Invalid amount value\n");
+        auto numres = util::str_to_num(args[2]);
+        if (!numres) return std::unexpected(numres.error());
+        int amount = numres.value();
 
         for (int i = 0; i < amount; i++) {
             auto working = pwatarg->feed(pwaherd.getsize());
@@ -858,27 +902,22 @@ command_system cmdres(herd& pwaherd) {
         return {};
     });
 
-    cmdsys.add("PWA", [&]() -> std::expected<void, std::string> {
-        std::string targetname;
-        std::cin >> targetname;
+    cmdsys.add("PWA", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
+        if (args.size() != 3) return std::unexpected(std::format("Expected 2 arguments, got {}\n", args.size()-1));
+        std::string targetname = args[1];
         Alpaca* pwatarg = pwaherd.findpwa(targetname);
         if (!pwatarg) return std::unexpected("No such alpaca pwa!\n");
 
-        int times;
-        if (!(std::cin >> times)) {
-            return std::unexpected (
-                "Invalid amount type\n This could also be that the command has the wrong format, refer to FAQ\n"
-            );
-        }
-
-        if (times <= 0 || times >= (int)1e4) return std::unexpected("Invalid amount value!\n");
+        auto numres = util::str_to_num(args[2]);
+        if (!numres) return std::unexpected(numres.error());
+        int times = numres.value();
         pwatarg->pwa(times);
         return {};
     });
 
-    cmdsys.add("PLY", [&]() -> std::expected<void, std::string> {
-        std::string targetname;
-        std::cin >> targetname;
+    cmdsys.add("PLY", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
+        if (args.size() != 2) return std::unexpected(std::format("Expected 1 arguments, got {}\n", args.size()-1));
+        std::string targetname = args[1];
         Alpaca* pwatarg = pwaherd.findpwa(targetname);
         if (!pwatarg) return std::unexpected("No such alpaca pwa!\n");
         auto res = playerinfo::instance().coindown(10);
@@ -887,18 +926,18 @@ command_system cmdres(herd& pwaherd) {
         return {};
     });
 
-    cmdsys.add("INF", [&]() -> std::expected<void, std::string> {
-        std::string pwaname;
-        std::cin >> pwaname;
+    cmdsys.add("INF", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
+        if (args.size() != 2) return std::unexpected(std::format("Expected 1 arguments, got {}\n", args.size()-1));
+        std::string pwaname = args[1];
         auto it = pwaherd.findpwa(pwaname);
         if (!it) return std::unexpected("No such alpaca!\n");
         it->intro();
         return {};
     });
 
-    cmdsys.add("ADD", [&]() -> std::expected<void, std::string> {
-        std::string pwaname;
-        std::cin >> pwaname;
+    cmdsys.add("ADD", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
+        if (args.size() != 2) return std::unexpected(std::format("Expected 1 arguments, got {}\n", args.size()-1));
+        std::string pwaname = args[1];
         auto it = pwaherd.findpwa(pwaname);
         if (it) return std::unexpected("That alpaca already exist!\n");
 
@@ -918,13 +957,15 @@ command_system cmdres(herd& pwaherd) {
 
     });
 
-    cmdsys.add("BAL", [&]() -> std::expected<void, std::string> {
+    cmdsys.add("BAL", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
+        if (args.size() != 1) return std::unexpected(std::format("Expected 0 arguments, got {}\n", args.size()-1));
         long long balance = playerinfo::instance().getBalance();
         std::cout << "Your balance is " << balance << " pwacoins!" << '\n';
         return {};
     });
 
-    cmdsys.add("LNP", [&]() -> std::expected<void, std::string> {
+    cmdsys.add("LNP", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
+        if (args.size() != 1) return std::unexpected(std::format("Expected 0 arguments, got {}\n", args.size()-1));
         std::cout << "PWA HERE IS YOUR LINEUP!" << '\n'
         << "You have " << pwaherd.getsize() << " alpacas!" << '\n'
         << "And may they introduce themselves to ya!" << '\n' << '\n';
@@ -934,25 +975,25 @@ command_system cmdres(herd& pwaherd) {
         return {};
     });
 
-    cmdsys.add("ACH", []() -> std::expected<void, std::string> {
+    cmdsys.add("ACH", [](std::vector<std::string>& args) -> std::expected<void, std::string> {
+        if (args.size() != 1) return std::unexpected(std::format("Expected 0 arguments, got {}\n", args.size()-1));
         std::cout << "PWA ACHIEVEMENTS!" << '\n';
         achieve_list.list_out();
         return {};
     });
 
-    cmdsys.add("AIF", []() -> std::expected<void, std::string> {
-        std::string line;
-        std::getline(std::cin, line);
-        std::stringstream ss(line);
-        std::string target;
-        std::getline(ss >> std::ws, target);
+    cmdsys.add("AIF", [](std::vector<std::string>& args) -> std::expected<void, std::string> {
+        //this one is a pain in hell
+        if (args.size() != 2) return std::unexpected(std::format("Expected 1 arguments, got {}\n", args.size()-1));
+        std::string target = args[1];
         auto res = achieve_list.show(target);
         if (!res) return std::unexpected(res.error());
         return {};
     });
 
-    cmdsys.add("DEV", []() -> std::expected<void, std::string> {
-        /// THIS COMMAND IS HIDDEN AND DELIBERATELY UNDOCUMENTED IN HLP
+    cmdsys.add("DEV", [](std::vector<std::string>& args) -> std::expected<void, std::string> {
+        /// THIS COMMAND IS HIDDEN AND DELIBERATELY UNDOCUMENTED
+        if (args.size() != 1) return std::unexpected(std::format("Expected 0 arguments, got {}\n", args.size()-1));
         std::cout << "Huh? you are... here? Is that that you found it by accident, "
         << "or someone told you? [Y/N]" << '\n' << "> ";
         std::string response;
@@ -969,7 +1010,8 @@ command_system cmdres(herd& pwaherd) {
         return {};
     });
 
-    cmdsys.add("END", [&]() -> std::expected<void, std::string> {
+    cmdsys.add("END", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
+        if (args.size() != 1) return std::unexpected(std::format("Expected 0 arguments, got {}\n", args.size()-1));
         std::cout << "Ending pwa =((((" << '\n';
         return std::unexpected("Ending");
     });
@@ -1129,15 +1171,16 @@ public:
         else {
             welcome();
         }
-        
-        std::string typeQ;
+
+        std::string cmdline;
         int time_of_day = 0;
 
-        while(std::cin >> typeQ) {
-            auto res = cmdsys.run(typeQ);
+        while(std::getline(std::cin, cmdline)) {
+            auto res = cmdsys.run(cmdline);
             if (!res) {
                 std::string error_msg = res.error();
                 if (error_msg == "Ending") break;
+                meta.logfail();
                 std::cout << error_msg;
             }
             else {
@@ -1147,7 +1190,6 @@ public:
             }
             achieve_list.check();
             std::cout << '\n' << "> ";
-            util::clearo();
         }
 
         std::cout << "PWA here is all your alpaca info" << '\n';

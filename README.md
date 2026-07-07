@@ -56,8 +56,9 @@ Show all achievements. Apparently there is no sorting or filtering
 
 8. AIF - View information on a specific achievement  
 AIF takes one argument - the achievement name  
-`AIF <name>`  
+`AIF "<name>"`  
 **The name must be exact**, and there is not matching feature yet, so it is prefered that you use `ACH` instead  
+**Use quotes around the name!** The name has multiple spaces, so you must use quotes
 Show specific info on an achievement
 
 9. INF - Show information on your alpaca  
