@@ -1,9 +1,4 @@
-# Save files
 save*.txt
-
-# Executables
 *.exe
-
-# Object files
 *.obj
 *.o

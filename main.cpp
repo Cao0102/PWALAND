@@ -1044,7 +1044,7 @@ class PWALAND {
         std::cout << "PWA WELCOME TO PWALAND! " << '\n'
         << "----------------------------------" << '\n'
         << "Newcommer pwa-eh? Pwa! You must be soooo pwa confused" << '\n'
-        << "Someone ought to"
+        << "Someone ought to show you how things are done here" << '\n'
         << "You have ALPACA, first is one, but more the better!" << '\n'
         << "How would you name your first alpaca?" << '\n';
         std::cout << "> ";
