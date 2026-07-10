@@ -15,6 +15,7 @@
 #include <ranges>
 #include <cassert>
 #include <charconv>
+#include <print>
 
 namespace sc {
     constexpr auto cmd = "Commands";
@@ -61,15 +62,13 @@ public:
         }
     }
     void say() {
-        std::cout << '\n' << "PWA! HERE IS YOUR METADATA!" << '\n'
-        << '\n' << "1. Commands metadata" << '\n'
-        << "You used ... times" << '\n';
-        for (auto& [name, amount] : metadata[sc::cmd]) std::cout << name << ": " << amount << '\n';
-        std::cout << '\n' << "2. Alpaca Statitics" << '\n';
-        for (auto& [name, amount] : metadata[sc::pwa])
-            std::cout << "Your alpacas together had achieved " << amount << ' ' << name << '!' << '\n';
-        std::cout << '\n' << "3. Fun and special stuff" << '\n'
-        << "You failed your commands " << metadata[sc::spc]["fail"] << " times... wow" << '\n';
+        std::print("\nPWA HERE IS YOUR METADATA\n");
+        std::print("\n1. Commands usage\n");
+        for (auto& [name, amount] : metadata[sc::cmd]) std::print("{}: {}\n", name, amount);
+        std::print("\n2. Alpaca stats\n");
+        for (auto& [name, amount] : metadata[sc::pwa]) std::print("You and your pwas together had achieved {} {}\n", amount, name);
+        std::print("\n3. Exotic stats\n");
+        std::print("Wondered how you failed your commands {} times? Pwa!\n", metadata[sc::spc]["fail"]);
     }
 };
 class metause {
@@ -109,16 +108,11 @@ namespace util {
     std::expected<int, std::string> str_to_num(std::string str) {
         int value;
         auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value);
-        if (ec == std::errc::invalid_argument)
-            return std::unexpected("Pwa? Isn't this supposed to be... a numbber?\n");
-        if (ec == std::errc::result_out_of_range || value >= 10000) 
-            return std::unexpected("Pwa... big number...\n");
-        if (value < 0)
-            return std::unexpected("But pwa no learn negative numbers!\n");
-        if (value == 0)
-            return std::unexpected("Pwa why would you do something 0 times?\n");
-        if (ptr != str.data() + str.size())
-            return std::unexpected("Tricky owner sneak trailing characters!\n");
+        if (ec == std::errc::invalid_argument) return std::unexpected("Pwa? Isn't this supposed to be... a numbber?\n");
+        if (ec == std::errc::result_out_of_range || value >= 10000) return std::unexpected("Pwa... big number...\n");
+        if (value < 0) return std::unexpected("But pwa no learn negative numbers!\n");
+        if (value == 0) return std::unexpected("Pwa why would you do something 0 times?\n");
+        if (ptr != str.data() + str.size()) return std::unexpected("Tricky owner sneak trailing characters!\n");
         return value;
     }
 }
@@ -144,25 +138,13 @@ public:
         for (auto& c : cond) if (!(c())) return 0;
         completed = true;
         return 1;
-
-        // 2 means this achievement was ALREADY COMPLETED
-        // 1 means this achievement is JUST COMPLETED
-        // 0 means this achievement is NOT COMPLETED
     }
     void set_secret() {secret = true;}
     void present() {
         if (secret == true) return;
-        std::cout << '\n' << "Achievement: " << name << '\n'
-        << "Description: " << des << '\n'
-        << "You have " << (completed ? "completed " : "not completed ") << "this achievement!" << '\n';
+        std::print("\nAchievement: {}\nDescription {}\nYou have {} this achievement!\n", name, des, (completed ? "completed " : "not completed "));
     }
-    void complete() {
-        std::cout << "You achieved... " << name << '!' << '\n'
-        << "Look at achievement info for more information!" << '\n';
-    }
-    void internal_markdone() {
-        completed = true;
-    }
+    void complete() {std::print("\nYou have completed {}! Check AIF \"{}\" for more info!\n", name, name);}
 };
 class achievements_mana {
     std::unordered_map<std::string, Achievements> achi;
@@ -257,7 +239,7 @@ public:
         add( "Tanky pwa, or pwa is a tank?", "Level up alpacas more than 10000 times", req.lvl(10'000));
     }
     std::expected<void, std::string> show (std::string& name) {
-        std::cout << "Searching for: [" << name << "]\n";
+        std::print("Searching for [{}]!\n", name);
         auto it = achi.find(name);
         if (it == achi.end()) return std::unexpected("No such achievements\n");
         it->second.present();
@@ -275,10 +257,7 @@ public:
         }
     }
     void save_sync() {
-        for (auto& [_, ach] : achi) {
-            int res = ach.check();
-            if (res == 1) ach.internal_markdone();
-        }
+        for (auto& [_, ach] : achi) int _ = ach.check();
     }
 };
 
@@ -328,32 +307,29 @@ class Alpaca {
     }
     void determine_levelup() {
         long long xp_required = (level * (long long) std::log2(level + 5)) * 2;
-        std::cout << std::format("Pwa {} is at level {}, [{}/{}]!\n", name, level, xp, xp_required);
+        std::print("Pwa {} is at level {}, [{}/{}]!\n", name, level, xp, xp_required);
         while (xp >= xp_required) {
             level++;
             meta.loglvl(1);
             xp -= xp_required;
             xp_required = (level * (long long) std::log2(level + 5)) * 2;
-            std::cout << std::format("YEAH! Pwa {} had leveled up to level {}, [{}/{}]!\n", name, level, xp, xp_required);
+            std::print("YEAH! Pwa {} had leveled up to level {}, [{}/{}]!\n", name, level, xp, xp_required);
             pwatimes++;
         }
     }
 
     void setid(int newid) {
-        std::cout << "PWA! I am setting my pwaid to "
-        << newid << '\n';
+        std::print("Pwa setting my pwaid to {}!\n", newid);
         pwaid = newid;
         pwatimes += 2;
     }
 
     void pwa(int times) {
-        std::cout << name << " pwaing! ";
+        std::print("{} pwaing!\n", name);
         pwatimes += times;
         meta.logpwa(times);
-        for (int i = 0; i < times; i++) {
-            std::cout << "pwa ";
-        }
-        std::cout << '\n';
+        for (int i = 0; i < times; i++) std::print("pwa ");
+        std::print("\n");
     }
 
     std::expected<void, std::string> feed(int herdsz) {
@@ -361,9 +337,7 @@ class Alpaca {
         cost = util::calc_fed_cost(herdsz);
         auto res = playerinfo::instance().coindown(cost);
         if (!res) return std::unexpected (res.error());
-        std::cout << "pwa " << name
-        << " thank you nhom nhom nhom "
-        << "yum pwa" << '\n';
+        std::print("PWA {} THANK YOU! PWA! NHOM NHOM NOHM NOM\n", name);
         pwatimes += 2;
         meta.logpwa(2);
         xp += 5;
@@ -372,7 +346,7 @@ class Alpaca {
     }
 
     void play() {
-        std::cout << "Playing with " << name << " PWA PWA!" << '\n';
+        std::print("Playing with {} PWA PWA!\n", name);
         struct chance {
             int perc;
             int pwam;
@@ -384,11 +358,12 @@ class Alpaca {
         for (auto& nows_your_chance : shot) {
             sum += nows_your_chance.perc;
             if (sum > destiny) {
-                std::cout << name << " is very happy pwa! You got " << nows_your_chance.pwam << " pwas and "
-                << nows_your_chance.expm << " xp!" << '\n';
-                pwatimes += nows_your_chance.pwam;
-                xp += nows_your_chance.expm;
-                meta.logpwa(nows_your_chance.pwam);
+                int pwaadded = nows_your_chance.pwam;
+                int xpadded = nows_your_chance.expm;
+                std::print("Pwa is very happy! You got {} xp and {} pwas!\n", xpadded, pwaadded);
+                pwatimes += pwaadded;
+                xp += xpadded;
+                meta.logpwa(pwaadded);
                 determine_levelup();
                 return;
             }
@@ -446,7 +421,7 @@ class Alpaca {
             if (sum > destiny) {
                 pwatimes += SHOT.pwamount;
                 meta.logpwa(SHOT.pwamount);
-                std::cout << SHOT.contents << '\n';
+                std::print("{}\n",SHOT.contents);
                 return;
             }
         }
@@ -462,10 +437,9 @@ class Alpaca {
         level = llevel;
         xp = lxp;
     }
-
+    
     void savepwa (std::ofstream& out) {
-        out << name << ' ' << pwaid << ' ' << pwatimes << ' '
-        << level << ' ' << xp << '\n';
+        std::print(out, "{} {} {} {} {}\n", name, pwaid, pwatimes, level, xp);
     }
 };
 
@@ -588,27 +562,33 @@ command_system cmdres(herd& pwaherd) {
     command_system cmdsys;
     cmdsys.add("HLP", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
         if (args.size() != 1) return std::unexpected(std::format("Expected 0 argumments, got {}\n", args.size()-1));
-        std::cout << '\n' << "COMMANDS GUIDE" << '\n'
-        << "----------------------------------"
-        << '\n' << "1. General commands" << '\n'
-        << "HLP - The help command, show commands details" << '\n'
-        << "FAQ - Common questions and errors" << '\n'
-        << "JGL - Show the changelog for the recent updates." << '\n'
-        << "MTD - Shows some data about your gameplay." << '\n'
-        << "END - Stop the program and exit, progress is indeed saved" << '\n'
-        << '\n' << "2. Player information" << '\n'
-        << "BAL - Show your pwacoin balance!" << '\n'
-        << "ACH - Show all achievements" << '\n'
-        << "AIF \"<name>\" - View information on a specific achievement" << '\n'
-        << '\n' << "3. Alpaca interactions" << '\n'
-        << "INF <name> - Show information on your alpaca" << '\n'
-        << "FED <name> <amount> - Feed the alpacas, may they pwa more and be well fed" << '\n'
-        << "PWA <name> <amount> - Let them PWA!" << '\n'
-        << "PLY <name> - Play with your alpaca!" << '\n'
-        << "ADD <name> - Grow your herd! Add another alpaca!" << '\n'
-        << "LNP - Show your alpaca formation!" << '\n'
-        << '\n' << "More features will be added soon, this will be updated" << '\n';
+        std::print(R"(
 
+COMMANDS GUIDE
+----------------------------------
+
+1. General commands
+HLP - The help command, show commands details
+FAQ - Common questions and errors
+JGL - Show the changelog for the recent updates.
+MTD - Shows some data about your gameplay.
+END - Stop the program and exit, progress is indeed saved
+
+2. Player information
+BAL - Show your pwacoin balance!
+ACH - Show all achievements
+AIF "<name>" - View information on a specific achievement
+
+3. Alpaca interactions
+INF <name> - Show information on your alpaca
+FED <name> <amount> - Feed the alpacas, may they pwa more and be well fed
+PWA <name> <amount> - Let them PWA!
+PLY <name> - Play with your alpaca!
+ADD <name> - Grow your herd! Add another alpaca!
+LNP - Show your alpaca formation!
+
+More coming soon! =)
+)");
         return {};
     });
 
@@ -621,38 +601,38 @@ command_system cmdres(herd& pwaherd) {
 
     cmdsys.add("FAQ", [](std::vector<std::string>& args) -> std::expected<void, std::string> {
         if (args.size() != 1) return std::unexpected(std::format("Expected 0 arguments, got {}\n", args.size()-1));
-        std::cout << '\n' << "FAQ" << '\n'
-        << "Q: Why is my command not fully interpreted, what does invalid amount type mean?" << '\n'
-        << "A: This means either that your command is missing or giving more than the required "
-        << "arguments, please notice that amount has to be a numeric value above 0 and that names "
-        << "are without spaces. The error means that your command structure is not as the program "
-        << "intended." << '\n' << '\n'
-        << "Q: Oh no my save / load is not working, is there any way to recover this?" << '\n'
-        << "A: Right now, unfortunately not. This could be that the file is deleted for it is a "
-        << "program error =(. If this were load, try running the file again. If this is save, then "
-        << "there is sadly no way to recover your progress, you could restart the program to recover "
-        << "from your last save, but your most recent progress is lost. One way to avoid this is to "
-        << "save regularly and do not make changes to the project folder. And most importantly, use "
-        << "the END command to close instead of closing the terminal itself, progress WILL NOT be "
-        << "updated if you close the terminal" << '\n' << '\n'
-        << "Q: My FED command is miscounted! Suppose i do FED _ 5 where i only have enough for 3, it "
-        << "will not count that command entirely!" << '\n'
-        << "A: We are aware of this problem, the commands in MTD only count sucessful commands whereas "
-        << "a partially sucessful command will not count, while we fix this, if you want to farm the "
-        << "stats, be wary and calculate how much money you can actually afford." <<  '\n' << '\n'
-        << "Q: I entered the right arguments, why does it says no such alpaca / command exist?" << '\n'
-        << "A: There is a good chance you are mixing lowercase and uppercase. You have to enter your "
-        << "alpaca name exactly the way you enter them at the ADD command or in the beginning, case "
-        << "sensitive. As for all commands you need to enter all letters uppercase. =)" << '\n' << '\n'
-        << "Q: Why is AIF so annoying?" << '\n'
-        << "A: Yes, I am entirely aware of this one, and is working towards fixing it in the future. "
-        << "For now, for the best, perhaps use ACH or copy the exact name from the achievement "
-        << "complete message (without the '!'). Hope it helps!" << '\n';
+        std::print (R"( 
 
+Frequently Asked Questions
+==================================
+
+Q: Oh no my save / load is not working, is there any way to recover this?
+A: Right now, unfortunately not. 
+This could be that the file is deleted for it is a program error =(. 
+    If this were load, try running the file again. 
+    If this is save, then there is sadly no way to recover your progress.
+One way to avoid this is to save regularly and do not make changes to the project folder. 
+Always using the END command to end the game and save it before closing the terminal
+
+Q: I entered the right arguments, why does it says no such alpaca / command exist?
+A: There is a good chance you are mixing lowercase and uppercase.
+    If you are entering a command, all letters uppercase
+    If you are entering an alpaca, case sensitive and be exact
+    This is another reason to enter a memorable and easy to type alpaca name
+
+Q: Is there any help entering achievement names? It's hard to enter!
+A: No, at least not yet, for now:
+    Always surround the names with quotes ("), this avoid parsing problems
+    Beware of case sensitivity
+    The program will show "Searching for: [Your_Input]" to help
+More recently, parser was updated to ignore leading and trailing spaces to help safer parsing
+
+)");
         return {};
     });
 
     cmdsys.add("JGL", [](std::vector<std::string>& args) -> std::expected<void, std::string> {
+        // DEPRECIATED
         if (args.size() != 1) return std::unexpected(std::format("Expected 0 arguments, got {}\n", args.size()-1));
         struct v_log {
             int large_v;
@@ -670,7 +650,7 @@ command_system cmdres(herd& pwaherd) {
         };
 
         for (auto& log : changelogs) {
-            std::cout << std::format("\n{}: Version {}.{}\n{}", log.date, log.large_v, log.small_v, log.contents);
+            std::print("\n{}: Version {}.{}\n{}\n", log.date, log.large_v, log.small_v, log.contents);
         }
 
         return {};
@@ -738,12 +718,11 @@ command_system cmdres(herd& pwaherd) {
 
         if (!res) return std::unexpected(res.error());
 
-        std::cout << "Adding alpaca " << pwaname << " into your herd!" << '\n';
+        std::print("Adding alpaca {} into your herd!\n", pwaname);
         pwaherd.addpwa(pwaname);
         auto it2 = pwaherd.findpwa(pwaname);
         it2->setid(pwaherd.getsize());
-        std::cout << "The herd grows..." << '\n';
-        std::cout << "You now have " << pwaherd.getsize() << " alpacas!" << '\n';
+        std::print("THe herd continues to grow\n You now have {} alpacas!\n", pwaherd.getsize());
         return {};
 
     });
@@ -751,24 +730,20 @@ command_system cmdres(herd& pwaherd) {
     cmdsys.add("BAL", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
         if (args.size() != 1) return std::unexpected(std::format("Expected 0 arguments, got {}\n", args.size()-1));
         long long balance = playerinfo::instance().getBalance();
-        std::cout << "Your balance is " << balance << " pwacoins!" << '\n';
+        std::print("Your balance is {} pwacoins\n", balance);
         return {};
     });
 
     cmdsys.add("LNP", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
         if (args.size() != 1) return std::unexpected(std::format("Expected 0 arguments, got {}\n", args.size()-1));
-        std::cout << "PWA HERE IS YOUR LINEUP!" << '\n'
-        << "You have " << pwaherd.getsize() << " alpacas!" << '\n'
-        << "And may they introduce themselves to ya!" << '\n' << '\n';
-
+        std::print("March! March! Pwa... Introduce!\nPwacount: {}!\n\n", pwaherd.getsize());
         pwaherd.intro();
-
         return {};
     });
 
     cmdsys.add("ACH", [](std::vector<std::string>& args) -> std::expected<void, std::string> {
         if (args.size() != 1) return std::unexpected(std::format("Expected 0 arguments, got {}\n", args.size()-1));
-        std::cout << "PWA ACHIEVEMENTS!" << '\n';
+        std::print("PWA ACHIEVEMENTS!\n\n");
         achieve_list.list_out();
         return {};
     });
@@ -785,25 +760,36 @@ command_system cmdres(herd& pwaherd) {
     cmdsys.add("DEV", [](std::vector<std::string>& args) -> std::expected<void, std::string> {
         /// THIS COMMAND IS HIDDEN AND DELIBERATELY UNDOCUMENTED
         if (args.size() != 1) return std::unexpected(std::format("Expected 0 arguments, got {}\n", args.size()-1));
-        std::cout << "Huh? you are... here? Is that that you found it by accident, "
-        << "or someone told you? [Y/N]" << '\n' << "> ";
+        std::print(R"(
+Oh... You are here? Interesting... Let's break away from the normal game for a moment and talk shall we?
+How did you find this?
+    [Someone told me/By accident/I datamined it]
+> )");
         std::string response;
-        std::cin >> response;
-        if (response == "Y") std::cout << "Oh, lucky you" << '\n';
-        else if (response == "N") std::cout << "I see..." << '\n';
-        else std::cout << "Weird but ok" << '\n';
-        std::cout << "Whether that is... Does it matter?" << '\n'
-        << "All that's to be that you are here..." << '\n'
-        << "Make this project for fun and all, im proud still" <<  '\n'
-        << "But hey! If you appreciate it, continue!" << '\n'
-        << "Bye! Again soon!" << '\n';
-
+        std::getline(std::cin, response);
+        if (response == "Someone told me") std::print("Fair enough\n");
+        else if (response == "By accident") std::print("Accident? That's sus...\n");
+        else if (response == "I datamined it") std::print("...\nOf course....\nNot... suprising at all...\n");
+        else std::print("Despite everything, you didn't follow the very clear written instructions.... \nYou are not my QA\n");
+        std::print(R"(
+Whatever that was... Should it matter?
+After all... this is my game to discover
+A first project I am dedicated in...
+So...
+Do you like it? [Y/N]
+> )");
+        while(std::getline(std::cin, response)) {
+            if (response == "Y") {std::print("Thank you, may you keep playing as happy\n"); break;}
+            else if (response == "N") std::print("Wrong answer, try again\n");
+            else std::print("As I said, you are not my QA >:( stop sending unfun responses\n> ");
+        }
+        std::print("I guess... Bye!\n");
         return {};
     });
 
     cmdsys.add("END", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
         if (args.size() != 1) return std::unexpected(std::format("Expected 0 arguments, got {}\n", args.size()-1));
-        std::cout << "Ending pwa =((((" << '\n';
+        std::print("Pwa, goodbye that fast?\n");
         return std::unexpected("Ending");
     });
 
@@ -824,83 +810,93 @@ class PWALAND {
             playerinfo::instance().recoverBal(coinmount);
             pwaherd.recoverpwa(nAlpacas, load);
             meta.loadin(load);
-            std::cout << "Loaded data successfully" << '\n';
+            std::print("Pwa data recovered!\n");
         }
-        else std::cout << "Failure to load!";
+        else std::print("Pwa... can't load the file... where? maybe pwa start again?\n");
 
         load.close();
     }
 
     void welcome() {
-        std::cout << "PWA WELCOME TO PWALAND! " << '\n'
-        << "----------------------------------" << '\n'
-        << "Newcommer pwa-eh? Pwa! You must be soooo pwa confused" << '\n'
-        << "Someone ought to show you how things are done here" << '\n'
-        << "You have ALPACA, first is one, but more the better!" << '\n'
-        << "How would you name your first alpaca?" << '\n';
-        std::cout << "> ";
+        std::print(R"(
+PWA WELCOME TO PWALAND!
+----------------------------------
+Newcommer pwa-eh? Pwa! You must be soooo pwa confused
+Someone ought to show you how things are done here
+You start off having one ALPACA. But soon will be many!
+How would you name your first alpaca? (no spaces!)
+> )");
         std::string name;
         std::cin >> name;
         pwaherd.addpwa(name);
         auto pwaplace = pwaherd.findpwa(name);
         pwaplace->setid(1);
         util::clearo();
-        std::cout << '\n';
-        std::cout << '\n' << "All done!" << '\n'
-        << "You will use commands to take care of him!"
-        << '\n' << "It's important you know which"
-        << '\n' << "Enter HLP for help!" << '\n'
-        << '\n' << "> ";
+        std::print(R"(
+
+All done!
+Now...
+These alpacas needed to be fed, played with and always say pwa!
+You will do this with commands!
+Enter "HLP" for help!
+> )");
     }
 
     void welcome_back() {
-        std::cout << "PWA YOU ACTUALLY CAME BACK!" << '\n'
-        << "Pwa pwa pwa we are so happy" << '\n'
-        << "Before we come back, do you want to continue last save, or start fresh? [Y/N]" << '\n'
-        << "> ";
+        std::print ("*Sleeping pwa mumbles* \nPWA! You came back? YAY PWA! You want to continue last save though? [Y/N]\n> ");
         std::string response;
         std::cin >> response;
         while (response != "N" && response != "Y") {
-            std::cout << "Please enter Y or N" << '\n' << "> ";
+            std::print("Please enter Y or N\n> ");
             std::cin >> response;
         }
         if (response == "Y") {
-            std::cout << "Great! We may proceed" << '\n'
-            << "For recap, this is all your info" << '\n'
-            << "You have " << pwaherd.getsize() << " alpacas!" << '\n'
-            << "Let's see your lineup again!" << '\n' << '\n';
+            std::print("Pwa! The fun starts again! For recap, you have {} alpacas!\nYou remember them?\n", pwaherd.getsize());
             pwaherd.intro();
-            std::cout << '\n' << "We ready for more fun again!" << '\n' << "> ";
+            std::print("Let's go! We start pwa! Enter HLP for help!\n> ");
             return;
         }
-        else {
-            std::cout << "Pwa... You will lose all your alpacas =(" << '\n'
-            << "Are you sure?" << '\n' << "Look at your alpacas =(" << '\n';
-            pwaherd.intro();
-            std::cout << "Do you really want to say bye?" << '\n' << "> ";
-            std::cin >> response;
-            while (response != "N" && response != "Y") {
-                std::cout << "Please enter Y or N" << '\n' << "> ";
-                std::cin >> response;
-            }
-            if (response == "Y") {
-                std::cout << "I guess you want it, bye *sobs*" << '\n';
-                std::filesystem::remove("save1.txt");
-                pwaherd.clear();
-                auto i = playerinfo::instance().coindown(playerinfo::instance().getBalance());
-                assert(i);
-                std::cout << "See... ya... again..." << '\n' << '\n';
-                welcome();
-            }
-            else {
-                std::cout << "Pwa! Knew you would change your mind" << '\n'
-                << "For recap, this is all your info" << '\n'
-                << "You have " << pwaherd.getsize() << " alpacas!" << '\n'
-                << "Let's see your lineup again!" << '\n';
-                pwaherd.intro();
-                std::cout << '\n' << "PWA! Back on track now!" << '\n' << "> ";
-            }
+        util::clearo();
+        std::print("Wait... you-- want to delete our world?\nBut... we had so much fun");
+        pwaherd.intro();
+        std::print(R"(
+Look... those are the alpacas
+
+Remember them? 
+
+You... had have so much fun... 
+
+...
+
+Why...
+
+Why would you want...
+
+To do such cruel things
+
+But, I cannot stop you can't I? 
+
+Do... do you still want to say goodbye?;
+    Proceed
+    Do Not
+> )");
+        std::getline(std::cin, response);
+        while (response != "Proceed" && response != "Do Not") {
+            std::print("\tProceed\n\tDo Not\n> ");
+            std::getline(std::cin, response);
         }
+        if (response == "Proceed") {
+            std::print("Suddenly, the world starts fading, and fading, ...\n");
+            std::filesystem::remove("save1.txt");
+            pwaherd.clear();
+            auto i = playerinfo::instance().coindown(playerinfo::instance().getBalance());
+            assert(i);
+            std::print("Until... Gone was the world you built...\n");
+            std::print("See... you... again...\n");
+            welcome();
+            std::print("And indeed... nothing, happened, nothing ever happened\nA world GONE\njust, like that..\n");
+        }
+        else {std::print("...\nYou caught yourself in the middle of the thought to delete a save, nevermind, enter \"HLP for cmd list\"\n> ");}
     }
 
     void day_ends() {
@@ -929,7 +925,7 @@ class PWALAND {
         for (auto& i : tickets) {
             sum += i.weight;
             if (sum >= holy_judgement) {
-                std::cout << i.dat << '\n';
+                std::print("{}\n", i.dat);
                 playerinfo::instance().coinup(pwacoins);
                 break;
             }
@@ -946,7 +942,7 @@ class PWALAND {
             save.close();
             return;
         }
-        else std::cout << "oops... no save file" << '\n';
+        else std::print("Oops, no save file found, this is an internal error, we are like, really sorry\n");
         save.close();
     }
 
@@ -972,7 +968,7 @@ public:
                 std::string error_msg = res.error();
                 if (error_msg == "Ending") break;
                 meta.logfail();
-                std::cout << error_msg;
+                std::print("{}\n",error_msg);
             }
             else {
                 time_of_day++;
@@ -980,14 +976,14 @@ public:
                 if (time_of_day == 0) day_ends();
             }
             achieve_list.check();
-            std::cout << '\n' << "> ";
+            std::print("\nUSER_COMMAND > ");
         }
 
-        std::cout << "PWA here is all your alpaca info" << '\n';
+        std::print("Here is your herd info up until now\n");
         pwaherd.intro();
-        std::cout << "Saving your herd data!" << '\n';
+        std::print("Saving your data\n");
         save_file();
-        std::cout << '\n' << "Pwa-bye! See ya again!" << '\n';
+        std::print("Pwa-bye! See ya again\n");
     }
 };
 

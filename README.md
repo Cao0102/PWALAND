@@ -26,6 +26,12 @@ As you see, `FED` is the command name, this refers to the feeding command.
 ***Please be aware that you could also access these using the `HLP` command***  
 ***This will be updated***  
 
+### Before that: TAGS
+**Name carefully**: The name is case sensitive, there is no name matchmaking, so remember your names, name your alpacas something memorable
+**Use quotes**: Use quotation mark to ensure correct parsing
+**Cost money**: This operation will cost money
+**Valid integer**: You must enter a valid positive integer that is numeral and below 10000
+
 1. HLP - The help command, show commands details  
 HLP takes no argument, all you need to enter is `HLP`  
 It will list all commands that exist, excluding only commands marked secret  
@@ -57,71 +63,55 @@ Show all achievements. Apparently there is no sorting or filtering
 8. AIF - View information on a specific achievement  
 AIF takes one argument - the achievement name  
 `AIF "<name>"`  
-**The name must be exact**, and there is not matching feature yet, so it is prefered that you use `ACH` instead  
-**Use quotes around the name!** The name has multiple spaces, so you must use quotes
+**Tags**: Name carefully, Use Quotes  
 Show specific info on an achievement
 
 9. INF - Show information on your alpaca  
 INF takes one argument - the alpaca name  
 `INF <name>`  
-**The name must be exact** as you originally entered it, there is no matching or suggestion, so it is prefered that you name your alpacas something memorable and easy to enter  
+**Tags**: Name carefully  
 Show your alpaca's details and statistics
 
 10. FED - Feed the alpaca
 FED takes two arguments - the alpaca name and the amount  
 `FED <name> <amount>`  
-**The name must be exact** as you originally entered it, there is no matching or suggestion, so it is prefered that you name your alpacas something memorable and easy to enter  
-The amount must be a **positive integer below 10000**  
-**Accepted amounts:** "1", "2", "5", "7", "99", "9999"  
-**Not accepted amounts:** "0", "10000", "9999999", "-3", "two", "95 thousand"  
-Please be aware that this operation **costs** pwacoins  
+**Tags**: Name carefully, Costs money, Valid integer  
 Feed the alpaca given to level them up  
 
 11. PWA - Let them PWA!
 PWA takes two arguments - the alpaca name and the amount  
 `PWA <name> <amount>`  
-**The name must be exact** as you originally entered it, there is no matching or suggestion, so it is prefered that you name your alpacas something memorable and easy to enter  
-The amount must be a **positive integer below 10000**  
-**Accepted amounts:** "1", "2", "5", "7", "99", "9999"  
-**Not accepted amounts:** "0", "10000", "9999999", "-3", "two", "95 thousand"  
+**Tags**: Name carefully, Valid integer  
 Let the alpaca says pwa =D  
 
 12. PLY - Play with your alpaca!
 PLY takes one argument - the alpaca name  
 `PLY <name>`  
-**The name must be exact** as you originally entered it, there is no matching or suggestion, so it is prefered that you name your alpacas something memorable and easy to enter  
-Please be aware that this operation **costs** pwacoins  
+**Tags**: Name carefully, Costs money  
 Play with your alpaca, they will pwa and gain a random amount of xp
 
 13. ADD - Grow your herd! Add another alpaca!  
 ADD takes one argument - the alpaca name  
 `ADD <name>`  
-**Please remember this name!** It is prefered that you name your alpacas something memorable and easy to enter.  
-Please be aware that this operation **costs** pwacoins  
+**Tags**: Name carefully, Costs money  
 Add another alpaca into your herd
 
 14. LNP - Show your alpaca formation!  
 LNP takes no argument, all you need to enter is `LNP`  
-All your alpacas will introduce themselves with their own statitics.
+All your alpacas will introduce themselves with their own statistics.
 
 ## What language is this written in?
-The entirety of the code is written in C++23
+The entirety of the code is written in C++26  
 
 ## How to compile this?
-Compile normally using C++23 and preferably a GNU compiler
-Prefered compile command: `g++ main.cpp -o game.exe -std=c++23 -O3 -Wall -Wextra -Wpedantic -Werror`
+Compile normally using C++26 and preferably a GNU compiler
+Preferred compile command: `g++ main.cpp -o game.exe -std=c++26 -lstdc++exp -O3 -Wall -Wextra -Wpedantic -Werror`
 Yes, you will complile on main.cpp
+Yes, I ALSO know that C++26 is not even done, but gnu had indeed made its features and I kinda used some of them  
+Trust me on the `-std=c++26 -lstdc++exp -O3` fr =D  
 
 ## Real talk...
 This is a personal hobby project not made for any assignment at all and gotta say, it was fun!
 I will not put any licensing on this project, at least in the short term future, meaning: All rights reserved
-That being said please do not distribute the code or game without my consent and credit for me, still
+That being said please do not distribute the code or game without my consent and credit for me
 =D
-
-
-# APENDIX
-***You can stop reading from here... or not, idk your choice***  
-
-## FUTURE CHANGES
-Centralize command parsing and pass arguments into functions instead of handing the argument parsing responsibility to the functions itself.
-Generally improve quality of error messages
