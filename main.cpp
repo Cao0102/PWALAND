@@ -135,9 +135,8 @@ public:
 
     int check() {
         if (completed) return 2;
-        for (auto& c : cond) if (!(c())) return 0;
-        completed = true;
-        return 1;
+        if (std::ranges::all_of(cond, [](auto& c) {return c();})) {completed = true; return 1;}
+        return 0;
     }
     void set_secret() {secret = true;}
     void present() {
@@ -245,20 +244,14 @@ public:
         it->second.present();
         return {};
     }
-    void list_out() {
-        for (auto& [_, ach] : achi) {
-            ach.present();
-        }
-    }
+    void list_out() {for (auto& [_, ach] : achi) ach.present();}
     void check() {
         for (auto& [_, ach] : achi) {
             int res = ach.check();
             if (res == 1) ach.complete();
         }
     }
-    void save_sync() {
-        for (auto& [_, ach] : achi) int _ = ach.check();
-    }
+    void save_sync() {for (auto& [_, ach] : achi) int _ = ach.check();}
 };
 
 achievements_mana achieve_list;
@@ -271,9 +264,7 @@ public:
         static playerinfo p;
         return p;
     }
-    void coinup(long long amount) {
-        money += amount;
-    }
+    void coinup(long long amount) {money += amount;}
 
     std::expected<void,std::string> coindown (long long amount) {
         if (money >= amount) {
@@ -283,13 +274,8 @@ public:
         else return std::unexpected(std::format("Not enough money pwa... You need {} more\n", amount-money));
     }
 
-    long long getBalance() {
-        return money;
-    }
-
-    void recoverBal(long long amount) {
-        money = amount;
-    }
+    long long getBalance() {return money;}
+    void recoverBal(long long amount) {money = amount;}
 };
 
 class Alpaca {
@@ -332,15 +318,17 @@ class Alpaca {
         std::print("\n");
     }
 
-    std::expected<void, std::string> feed(int herdsz) {
+    std::expected<void, std::string> feed(int times, int herdsz) {
         long long cost;
         cost = util::calc_fed_cost(herdsz);
         auto res = playerinfo::instance().coindown(cost);
         if (!res) return std::unexpected (res.error());
-        std::print("PWA {} THANK YOU! PWA! NHOM NHOM NOHM NOM\n", name);
-        pwatimes += 2;
-        meta.logpwa(2);
-        xp += 5;
+        std::print("Pwa, really? You are giving me {} food? THANK YOU PWA!", times);
+        while (times--) {
+            pwatimes += 2;
+            meta.logpwa(2);
+            xp += 5;
+        }
         determine_levelup();
         return {};
     }
@@ -353,21 +341,20 @@ class Alpaca {
             int expm;
         };
         int destiny = util::rng();
-        std::vector<chance> shot { {15, 20, 20}, {20, 15, 20}, {25, 20, 15}, {30, 10, 10}, {9, 25, 25}, {1, 100, 100} };
+        constexpr static std::array<chance, 6> shot {{ {15, 20, 20}, {20, 15, 20}, {25, 20, 15}, {30, 10, 10}, {9, 25, 25}, {1, 100, 100} }};
         int sum = 0;
-        for (auto& nows_your_chance : shot) {
-            sum += nows_your_chance.perc;
-            if (sum > destiny) {
-                int pwaadded = nows_your_chance.pwam;
-                int xpadded = nows_your_chance.expm;
-                std::print("Pwa is very happy! You got {} xp and {} pwas!\n", xpadded, pwaadded);
-                pwatimes += pwaadded;
-                xp += xpadded;
-                meta.logpwa(pwaadded);
-                determine_levelup();
-                return;
-            }
-        }
+        auto reward_place = std::ranges::find_if(shot, [&](const chance& slot) {sum += slot.perc; return sum > destiny;});
+        assert(reward_place != shot.end());
+
+        auto reward = *reward_place;
+        int pwaadded = reward.pwam;
+        int xpadded = reward.expm;
+        std::print("Pwa is very happy! You got {} xp and {} pwas!\n", xpadded, pwaadded);
+        pwatimes += pwaadded;
+        xp += xpadded;
+        meta.logpwa(pwaadded);
+        determine_levelup();
+        return;
     }
 
     void intro() {
@@ -379,7 +366,7 @@ class Alpaca {
 
         int destiny = util::rng();
 
-        std::vector<ticket> BIG_SHOT = {
+        const std::array<ticket,8> BIG_SHOT = {{
             {
                 24, 6,
                 std::format("PWA! Pwa's name is {}, pwa's id is {}, pwa is level {} + {} xp, and pwa had pwa-ed {} times"
@@ -413,34 +400,25 @@ class Alpaca {
                 std::format("PWA HA HA HA HA! PWA WILL PWA EVERYTHING INTO PWAS AND PWAS PWA PWA PWA. Know PWA! Pwa is {}"
                             , name)
             }
-        };
+        }};
 
         int sum = 0;
-        for (auto& SHOT : BIG_SHOT) {
-            sum += SHOT.chance;
-            if (sum > destiny) {
-                pwatimes += SHOT.pwamount;
-                meta.logpwa(SHOT.pwamount);
-                std::print("{}\n",SHOT.contents);
-                return;
-            }
-        }
+        auto SHOTPLACE = std::ranges::find_if(BIG_SHOT, [&sum, &destiny](const auto& c) {sum += c.chance; return sum > destiny;});
+        assert(SHOTPLACE != BIG_SHOT.end());
+        auto SHOT = *SHOTPLACE;
+        pwatimes += SHOT.pwamount;
+        meta.logpwa(SHOT.pwamount);
+        std::print("{}\n",SHOT.contents);
+        return;
     }
-    void restorepwa (
-                    int lid,
-                    int lpwatimes, int llevel,
-                    long long lxp
-                    )
-    {
+    void restorepwa (int lid, int lpwatimes, int llevel, long long lxp) {
         pwaid = lid;
         pwatimes = lpwatimes;
         level = llevel;
         xp = lxp;
     }
     
-    void savepwa (std::ofstream& out) {
-        std::print(out, "{} {} {} {} {}\n", name, pwaid, pwatimes, level, xp);
-    }
+    void savepwa (std::ofstream& out) {std::print(out, "{} {} {} {} {}\n", name, pwaid, pwatimes, level, xp);}
 };
 
 class command_system {
@@ -467,24 +445,20 @@ public:
         bool iQuoted = false;
         a.reserve(10);
         for (char c : cmd) {
-            if (iQuoted) {
-                if (c == '"') {
-                    iQuoted = false; 
-                    a.push_back(cur); 
-                    cur.clear();
-                    if (a.size() > 10) return std::unexpected("Hey! PWA DIZZY! TOO MANY ARGUMENTS\n");
-                    continue;
-                }
-                cur.push_back(c);
+            if (iQuoted && c == '"') {
+                iQuoted = false; 
+                a.push_back(cur); 
+                cur.clear();
+                if (a.size() > 10) return std::unexpected("Hey! PWA DIZZY! TOO MANY ARGUMENTS\n");
                 continue;
             }
             if (c == '"') {iQuoted = true; continue;}
-            if (c == ' ' && !cur.empty()) {
+            if (c != ' ' || iQuoted) {cur.push_back(c); continue;}
+            if (!cur.empty()) {
                 a.push_back(cur);
                 cur.clear();
                 if (a.size() > 10) return std::unexpected("Hey! PWA DIZZY! TOO MANY ARGUMENTS\n");
             }
-            else if (c != ' ') cur.push_back(c);
         }
         if (!cur.empty()) a.push_back(cur);
         if (a.size() > 10) return std::unexpected("Hey! PWA DIZZY! TOO MANY ARGUMENTS\n");
@@ -547,15 +521,8 @@ public:
         }
     }
 
-    void savepwa(std::ofstream& out) {
-        for (auto& [name, alpaca] : pwaherd) {
-            alpaca.savepwa(out);
-        }
-    }
-
-    void clear() {
-        pwaherd.clear();
-    }
+    void savepwa(std::ofstream& out) {for (auto& [name, alpaca] : pwaherd) alpaca.savepwa(out);}
+    void clear() {pwaherd.clear();}
 };
 
 command_system cmdres(herd& pwaherd) {
@@ -649,9 +616,7 @@ More recently, parser was updated to ignore leading and trailing spaces to help 
             }
         };
 
-        for (auto& log : changelogs) {
-            std::print("\n{}: Version {}.{}\n{}\n", log.date, log.large_v, log.small_v, log.contents);
-        }
+        for (auto& log : changelogs) std::print("\n{}: Version {}.{}\n{}\n", log.date, log.large_v, log.small_v, log.contents);
 
         return {};
     });
@@ -666,10 +631,8 @@ More recently, parser was updated to ignore leading and trailing spaces to help 
         if (!numres) return std::unexpected(numres.error());
         int amount = numres.value();
 
-        for (int i = 0; i < amount; i++) {
-            auto working = pwatarg->feed(pwaherd.getsize());
-            if (!working) return std::unexpected(working.error());
-        }
+        auto working = pwatarg->feed(amount, pwaherd.getsize());
+        if (!working) return std::unexpected(working.error());
         return {};
     });
 
@@ -876,7 +839,7 @@ To do such cruel things
 
 But, I cannot stop you can't I? 
 
-Do... do you still want to say goodbye?;
+Do... do you still want to say goodbye?
     Proceed
     Do Not
 > )");
@@ -905,7 +868,7 @@ Do... do you still want to say goodbye?;
             int weight;
             std::string dat;
         };
-        std::vector<Ticket> tickets = {
+        std::array<Ticket,4> tickets = {{
             {   33,
                 std::format("The day ends... your alpacas had given you {} pwacoins!", pwacoins)
             }, {
@@ -918,10 +881,11 @@ Do... do you still want to say goodbye?;
                 1,
                 std::format("Secret lies upon, will you dare? You are awarded {} pwacoins...", pwacoins)
             }
-        };
+        }};
         int holy_judgement = util::rng();
 
         int sum = 0;
+        auto spincake = std::ranges::find_if(tickets, [&sum, holy_judgement](const auto& c) {sum += c.weight; return sum > holy_judgement;});
         for (auto& i : tickets) {
             sum += i.weight;
             if (sum >= holy_judgement) {
@@ -955,9 +919,7 @@ public:
             achieve_list.save_sync();
             welcome_back();
         }
-        else {
-            welcome();
-        }
+        else welcome();
 
         std::string cmdline;
         int time_of_day = 0;
