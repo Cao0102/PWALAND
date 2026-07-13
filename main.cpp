@@ -343,7 +343,7 @@ class Alpaca {
         int destiny = util::rng();
         constexpr static std::array<chance, 6> shot {{ {15, 20, 20}, {20, 15, 20}, {25, 20, 15}, {30, 10, 10}, {9, 25, 25}, {1, 100, 100} }};
         int sum = 0;
-        auto reward_place = std::ranges::find_if(shot, [&](const chance& slot) {sum += slot.perc; return sum > destiny;});
+        auto reward_place = std::ranges::find_if(shot, [&sum, destiny](const chance& slot) {sum += slot.perc; return sum > destiny;});
         assert(reward_place != shot.end());
 
         auto reward = *reward_place;
@@ -481,7 +481,7 @@ public:
 };
 
 class herd {
-    std::map<std::string, Alpaca> pwaherd;
+    std::unordered_map<std::string, Alpaca> pwaherd;
 public:
     Alpaca* findpwa (const std::string name) {
         auto it = pwaherd.find(name);
@@ -869,31 +869,18 @@ Do... do you still want to say goodbye?
             std::string dat;
         };
         std::array<Ticket,4> tickets = {{
-            {   33,
-                std::format("The day ends... your alpacas had given you {} pwacoins!", pwacoins)
-            }, {
-                33,
-                std::format("Dusk and dawn, may the next day be peaceful, you have been awarded {} pwacoins!", pwacoins)
-            }, {
-                33,
-                std::format("Sky had faded, day had ended. You are awarded with {} pwacoins!", pwacoins)
-            }, {
-                1,
-                std::format("Secret lies upon, will you dare? You are awarded {} pwacoins...", pwacoins)
-            }
+            { 33, std::format("The day ends... your alpacas had given you {} pwacoins!", pwacoins)},
+            { 33, std::format("Dusk and dawn, may the next day be peaceful, you have been awarded {} pwacoins!", pwacoins)}, 
+            { 33, std::format("Sky had faded, day had ended. You are awarded with {} pwacoins!", pwacoins)}, 
+            { 1, std::format("Secret lies upon, will you dare? You are awarded {} pwacoins...", pwacoins)}
         }};
         int holy_judgement = util::rng();
 
         int sum = 0;
         auto spincake = std::ranges::find_if(tickets, [&sum, holy_judgement](const auto& c) {sum += c.weight; return sum > holy_judgement;});
-        for (auto& i : tickets) {
-            sum += i.weight;
-            if (sum >= holy_judgement) {
-                std::print("{}\n", i.dat);
-                playerinfo::instance().coinup(pwacoins);
-                break;
-            }
-        }
+        std::string data = spincake->dat;
+        std::print("{}\n", data);
+        playerinfo::instance().coinup(pwacoins);
     }
 
     void save_file() {
