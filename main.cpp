@@ -16,6 +16,8 @@
 #include <cassert>
 #include <charconv>
 #include <print>
+#include <chrono>
+#include <thread>
 
 namespace sc {
     constexpr auto cmd = "Commands";
@@ -89,6 +91,16 @@ public:
 metause meta;
 
 namespace util {
+    void delay(int ms) {std::this_thread::sleep_for(std::chrono::milliseconds(ms));}
+    int get_date() {
+        auto now = std::chrono::system_clock::now();
+        auto today = std::chrono::floor<std::chrono::days>(now);
+        std::chrono::year_month_day date{today};
+        int year = (int) date.year();
+        int month = (unsigned int) date.month();
+        int day = (unsigned int) date.day();
+        return year*10'000 + month*100 + day;
+    }
     void clearo() {
         std::cin.clear();
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
