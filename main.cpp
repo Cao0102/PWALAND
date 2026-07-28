@@ -743,6 +743,14 @@ Do you like it? [Y/N]
         return std::unexpected("Ending");
     });
 
+    cmdsys.add("ADMIN", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
+        if (args.size() == 2 && args[1] == "Save clear") {
+            std::print("\n[ADMIN] Clearing save\n");
+            std::filesystem::remove("save1.txt");
+        }
+        return {};
+    });
+
     return cmdsys;
 }
 

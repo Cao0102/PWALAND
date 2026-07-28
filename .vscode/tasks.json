@@ -8,12 +8,13 @@
                 "-std=c++26",
                 "-fdiagnostics-color=always",
                 "-g",
-                "${file}",
+                "${fileBasename}",
+                "-lstdc++exp",
                 "-o",
-                "${fileDirname}\\${fileBasenameNoExtension}.exe"
+                "${fileBasenameNoExtension}.exe"
             ],
             "options": {
-                "cwd": "C:/Program Files/CodeBlocks/MinGW/bin"
+                "cwd": "${fileDirname}"
             },
             "problemMatcher": [
                 "$gcc"
