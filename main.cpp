@@ -117,7 +117,7 @@ namespace util {
     long long calc_fed_cost(int herdsz) {
         return meta.getlvl() + herdsz*5 - std::min(meta.getpwa()/50000, (long long) herdsz*3);
     }
-    std::expected<int, std::string> str_to_num(std::string str) {
+    std::expected<int, std::string> str_to_num(const std::string& str) {
         int value;
         auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value);
         if (ec == std::errc::invalid_argument) return std::unexpected("Pwa? Isn't this supposed to be... a numbber?\n");
@@ -379,39 +379,14 @@ class Alpaca {
         int destiny = util::rng();
 
         const std::array<ticket,8> BIG_SHOT = {{
-            {
-                24, 6,
-                std::format("PWA! Pwa's name is {}, pwa's id is {}, pwa is level {} + {} xp, and pwa had pwa-ed {} times"
-                            , name, pwaid, level, xp, pwatimes)
-            }, {
-                24, 9,
-                std::format("pwa pwa pwa... pwa is {}, with id {} and pwa pwa level {} + {} xp, pwa pwa pwa-ed {} times"
-                            , name, pwaid, level, xp, pwatimes)
-            }, {
-                24, 9,
-                std::format("PWA! PWA! PWA! NAME {}! ID {}! LEVEL {}! XP {}! PWATIMES {}! PWA! PWA! PWA! PWA! PWA!"
-                            , name, pwaid, level, xp, pwatimes)
-            }, {
-                24, 6,
-                std::format("PWA PWa Pwa pwa... name is {}, ID is {}, level is {} + {} xp, and pwa pwa-ed {} times"
-                            , name, pwaid, level, xp, pwatimes)
-            }, {
-                1, 20,
-                std::format("PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA {}"
-                            , name)
-            }, {
-                1, 10,
-                std::format("Pwa... {} here! Pwa??? Pwa pwa pwa pwa no tell >:(, pwa ha ha ha ha pwa pwa pwa *eat grass*"
-                            , name)
-            }, {
-                1, 8,
-                std::format("And it's AL - PA - CA TIME for pwa to PWA PWA PWA pwa pwa. Pwa name is {} pwa"
-                            , name)
-            }, {
-                1, 10,
-                std::format("PWA HA HA HA HA! PWA WILL PWA EVERYTHING INTO PWAS AND PWAS PWA PWA PWA. Know PWA! Pwa is {}"
-                            , name)
-            }
+            { 24, 6, std::format("PWA! Pwa's name is {}, pwa's id is {}, pwa is level {} + {} xp, and pwa had pwa-ed {} times", name, pwaid, level, xp, pwatimes)}, 
+            { 24, 9, std::format("pwa pwa pwa... pwa is {}, with id {} and pwa pwa level {} + {} xp, pwa pwa pwa-ed {} times", name, pwaid, level, xp, pwatimes)}, 
+            { 24, 9, std::format("PWA! PWA! PWA! NAME {}! ID {}! LEVEL {}! XP {}! PWATIMES {}! PWA! PWA! PWA! PWA! PWA!", name, pwaid, level, xp, pwatimes)},
+            { 24, 6, std::format("PWA PWa Pwa pwa... name is {}, ID is {}, level is {} + {} xp, and pwa pwa-ed {} times", name, pwaid, level, xp, pwatimes)}, 
+            { 1, 20, std::format("PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA {}", name)}, 
+            { 1, 10, std::format("Pwa... {} here! Pwa??? Pwa pwa pwa pwa no tell >:(, pwa ha ha ha ha pwa pwa pwa *eat grass*", name)}, 
+            { 1, 8, std::format("And it's AL - PA - CA TIME for pwa to PWA PWA PWA pwa pwa. Pwa name is {} pwa", name)}, 
+            { 1, 10, std::format("PWA HA HA HA HA! PWA WILL PWA EVERYTHING INTO PWAS AND PWAS PWA PWA PWA. Know PWA! Pwa is {}", name)}
         }};
 
         int sum = 0;
@@ -869,7 +844,7 @@ Do... do you still want to say goodbye?
             std::print("Until... Gone was the world you built...\n");
             std::print("See... you... again...\n");
             welcome();
-            std::print("And indeed... nothing, happened, nothing ever happened\nA world GONE\njust, like that..\n");
+            std::print("\nAnd indeed... nothing, happened, nothing ever happened\nA world GONE\njust, like that..\n> ");
         }
         else {std::print("...\nYou caught yourself in the middle of the thought to delete a save, nevermind, enter \"HLP for cmd list\"\n> ");}
     }
