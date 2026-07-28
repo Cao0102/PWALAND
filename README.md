@@ -67,37 +67,41 @@ AIF takes one argument - the achievement name
 **Tags**: Name carefully, Use Quotes  
 Show specific info on an achievement
 
-9. INF - Show information on your alpaca  
+9. DLY - Claim daily reward
+DLY takes no argument, all you need to enter is `DLY`
+Claim your daily reward, rewards are random 
+
+10. INF - Show information on your alpaca  
 INF takes one argument - the alpaca name  
 `INF <name>`  
 **Tags**: Name carefully  
 Show your alpaca's details and statistics
 
-10. FED - Feed the alpaca
+11. FED - Feed the alpaca
 FED takes two arguments - the alpaca name and the amount  
 `FED <name> <amount>`  
 **Tags**: Name carefully, Costs money, Valid integer  
 Feed the alpaca given to level them up  
 
-11. PWA - Let them PWA!
+12. PWA - Let them PWA!
 PWA takes two arguments - the alpaca name and the amount  
 `PWA <name> <amount>`  
 **Tags**: Name carefully, Valid integer  
 Let the alpaca says pwa =D  
 
-12. PLY - Play with your alpaca!
+13. PLY - Play with your alpaca!
 PLY takes one argument - the alpaca name  
 `PLY <name>`  
 **Tags**: Name carefully, Costs money  
 Play with your alpaca, they will pwa and gain a random amount of xp
 
-13. ADD - Grow your herd! Add another alpaca!  
+14. ADD - Grow your herd! Add another alpaca!  
 ADD takes one argument - the alpaca name  
 `ADD <name>`  
 **Tags**: Name carefully, Costs money  
 Add another alpaca into your herd
 
-14. LNP - Show your alpaca formation!  
+15. LNP - Show your alpaca formation!  
 LNP takes no argument, all you need to enter is `LNP`  
 All your alpacas will introduce themselves with their own statistics.
 
