@@ -20,7 +20,7 @@
 #include <thread>
 #include <array>
 
-constexpr int SAVE_VERSION = 1;
+constexpr int SAVE_VERSION = 2;
 
 namespace sc {
     constexpr auto cmd = "Commands";
@@ -83,6 +83,7 @@ public:
     void loglvl(int x) { mtd.use(sc::pwa, "lvl") += x; }
     void logfail() { mtd.use(sc::spc, "fail")++; }
     void logcmd(std::string cmd) { mtd.use(sc::cmd, cmd)++; }
+    void loglastdaily(int date) { mtd.use(sc::spc, "ldaily") = date; }
     void saveto(std::ofstream& out) { mtd.exp(out); }
     void loadin(std::ifstream& in) { mtd.imp(in); }
     void listout() { mtd.say(); }
@@ -90,6 +91,7 @@ public:
     long long getpwa() { return mtd.get(sc::pwa, "pwa"); }
     long long getcmd(std::string cmd) { return mtd.get(sc::cmd, cmd); }
     long long getfail() { return mtd.get(sc::spc, "fail"); }
+    long long getlastdaily() { return mtd.get(sc::spc, "ldaily"); }
 };
 metause meta;
 
@@ -234,6 +236,8 @@ public:
         add( "A literal barn!", "Use the ADD command more than 10 times", req.cmd("ADD", 10));
         add( "Line... up!", "Use the LNP command", req.cmd("LNP", 1));
         add( "Into formation!", "Use the LNP command more than 10 times", req.cmd("LNP", 10));
+        add( "Prizes, YAY!", "Use the DLY command", req.cmd("DLY", 1));
+        add( "Daily logger", "Use the DLY command 10 times", req.cmd("DLY", 10));
         add( "Pwa-bye!", "Use the END command", req.cmd("END", 1));
         add( "Quitter!", "Use the END command more than 10 times", req.cmd("END", 10));
         add( "First command ever!", "Enter your first command", req.cmd("ALL", 1));
@@ -535,6 +539,7 @@ END - Stop the program and exit, progress is indeed saved
 BAL - Show your pwacoin balance!
 ACH - Show all achievements
 AIF "<name>" - View information on a specific achievement
+DLY - Get the daily reward!
 
 3. Alpaca interactions
 INF <name> - Show information on your alpaca
@@ -710,6 +715,28 @@ More recently, parser was updated to ignore leading and trailing spaces to help 
         return {};
     });
 
+    cmdsys.add("DLY", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
+        if (args.size() != 1) return std::unexpected(std::format("Expected 0 arguments, got {}\n", args.size()-1));
+        int lastDaily = meta.getlastdaily();
+        if (util::get_date() - lastDaily >= 1) {
+            struct ticket {
+                int chance;
+                int pwacoins;
+            };
+            constexpr static std::array<ticket, 4> chance = {{{10, 220}, {20, 200}, {30, 150}, {40, 80}}};
+            int result = util::rng();
+            int sum = 0;
+            auto reward_place = std::ranges::find_if(chance, [&sum, result](const ticket& slot) {sum += slot.chance; return sum > result;});
+            assert(reward_place != chance.end());
+            int reward = reward_place->pwacoins;
+            std::print("You got... {} PWACOINS! Come back tomorrow for more prices!\n", reward);
+            playerinfo::instance().coinup(reward);
+            meta.loglastdaily(util::get_date());
+        }
+        else std::print("Awww you already take your daily rewards today...\n");
+        return {};
+    });
+
     cmdsys.add("DEV", [](std::vector<std::string>& args) -> std::expected<void, std::string> {
         /// THIS COMMAND IS HIDDEN AND DELIBERATELY UNDOCUMENTED
         if (args.size() != 1) return std::unexpected(std::format("Expected 0 arguments, got {}\n", args.size()-1));
@@ -775,9 +802,11 @@ class PWALAND {
         std::ifstream load("save1.txt");
 
         if (load.is_open()) {
-            int SaveVInFile;
+            int SaveVInFile; int lastDaily;
             load >> SaveVInFile;
             if (SaveVInFile != SAVE_VERSION) return std::unexpected("Save file version mismatch\n");
+            load >> lastDaily;
+            meta.loglastdaily(lastDaily);
             int nAlpacas;
             long long coinmount;
             load >> coinmount >> nAlpacas;
@@ -899,6 +928,7 @@ Do... do you still want to say goodbye?
         std::ofstream save("save1.txt");
         if (save) {
             save << SAVE_VERSION << '\n';
+            save << meta.getlastdaily() << '\n';
             save << playerinfo::instance().getBalance() << '\n';
             save << pwaherd.getsize() << '\n';
             pwaherd.savepwa(save);
