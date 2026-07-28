@@ -18,6 +18,7 @@
 #include <print>
 #include <chrono>
 #include <thread>
+#include <array>
 
 constexpr int SAVE_VERSION = 1;
 
