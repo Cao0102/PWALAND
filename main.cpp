@@ -19,6 +19,8 @@
 #include <chrono>
 #include <thread>
 
+constexpr int SAVE_VERSION = 1;
+
 namespace sc {
     constexpr auto cmd = "Commands";
     constexpr auto pwa = "Alpaca";
@@ -768,10 +770,13 @@ class PWALAND {
     herd pwaherd;
     command_system cmdsys;
 
-    void load_data() {
+    std::expected<void, std::string> load_data() {
         std::ifstream load("save1.txt");
 
         if (load.is_open()) {
+            int SaveVInFile;
+            load >> SaveVInFile;
+            if (SaveVInFile != SAVE_VERSION) return std::unexpected("Save file version mismatch\n");
             int nAlpacas;
             long long coinmount;
             load >> coinmount >> nAlpacas;
@@ -780,9 +785,10 @@ class PWALAND {
             meta.loadin(load);
             std::print("Pwa data recovered!\n");
         }
-        else std::print("Pwa... can't load the file... where? maybe pwa start again?\n");
+        else return std::unexpected("Pwa... System error... File loaded unsuccessfully\n");
 
         load.close();
+        return {};
     }
 
     void welcome() {
@@ -891,6 +897,7 @@ Do... do you still want to say goodbye?
     void save_file() {
         std::ofstream save("save1.txt");
         if (save) {
+            save << SAVE_VERSION << '\n';
             save << playerinfo::instance().getBalance() << '\n';
             save << pwaherd.getsize() << '\n';
             pwaherd.savepwa(save);
@@ -907,9 +914,13 @@ public:
         cmdsys = cmdres(this->pwaherd);
         achieve_list.setup();
         if (util::if_save_exist()) {
-            load_data();
-            achieve_list.save_sync();
-            welcome_back();
+            auto load_result = load_data();
+            if (load_result) {
+                std::print("PWA LOAD SUCESSFUL!\n");
+                achieve_list.save_sync();
+                welcome_back();
+            }
+            else {std::print("Error: {}!\nPerhaps this is an internal error, for now we can restart the game\n", load_result.error()); welcome();}
         }
         else welcome();
 
