@@ -745,8 +745,18 @@ Do you like it? [Y/N]
 
     cmdsys.add("ADMIN", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
         if (args.size() == 2 && args[1] == "Save clear") {
-            std::print("\n[ADMIN] Clearing save\n");
+            std::print("\n[ADMIN] Clearing save\nRecommend pwa to restart the game\n");
             std::filesystem::remove("save1.txt");
+        }
+        else {
+            std::print(R"(
+Pwa... No such admin command exists
+Here are the existing commands!
+
+ADMIN "Save clear"
+With double quotes!
+Clear the save without having to go through the normal pathway
+)");
         }
         return {};
     });
@@ -832,7 +842,7 @@ Why would you want...
 
 To do such cruel things
 
-But, I cannot stop you can't I? 
+But... I suppose I can't stop you...
 
 Do... do you still want to say goodbye?
     Proceed
