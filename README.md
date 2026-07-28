@@ -42,7 +42,8 @@ It will list *prewritten* Frequently-Asked-Questions.
 
 3. JGL - Show the changelog for the recent updates.  
 JGL takes no argument, all you need to enter is `JGL`  
-It will list all recent updates to the game.
+It will list all recent updates to the game.  
+**IMPORTANT: THIS COMMAND IS GETTING DEPRECIATED**
 
 4. MTD - Shows some data about your gameplay.  
 MTD takes no argument, all you need to enter is `MTD`  
@@ -109,9 +110,15 @@ Preferred compile command: `g++ main.cpp -o game.exe -std=c++26 -lstdc++exp -O3 
 Yes, you will complile on main.cpp
 Yes, I ALSO know that C++26 is not even done, but gnu had indeed made its features and I kinda used some of them  
 Trust me on the `-std=c++26 -lstdc++exp -O3` fr =D  
+No other setup is needed, just clone the repository and compile the file
 
 ## Real talk...
 This is a personal hobby project not made for any assignment at all and gotta say, it was fun!
 I will not put any licensing on this project, at least in the short term future, meaning: All rights reserved
 That being said please do not distribute the code or game without my consent and credit for me
 =D
+
+# BELOW IS SEVERAL EXTRAS, YOU MAY NOT FIND THIS SECTION INTERESTING  
+## COMMAND EXTRA: ADMIN
+The `ADMIN` command takes a non fixed amount of arguments and follow a fixed schema, several options include  
+`ADMIN "Save clear"`, delete the save currently loaded without going through the usual pathway  
