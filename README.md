@@ -21,6 +21,7 @@ For example: `FED Brown 5`
 As you see, `FED` is the command name, this refers to the feeding command.  
 `Brown` is the alpaca name (must be exact, case sensitive!).  
 `5` is the amount, aka how many times will you feed this alpaca?  
+**For specific implementation details, please scroll down**  
 
 ## What commands do we have?  
 ***Please be aware that you could also access these using the `HLP` command***  
@@ -40,68 +41,63 @@ It will list all commands that exist, excluding only commands marked secret
 FAQ takes no argument, all you need to enter is `FAQ`  
 It will list *prewritten* Frequently-Asked-Questions.  
 
-3. JGL - Show the changelog for the recent updates.  
-JGL takes no argument, all you need to enter is `JGL`  
-It will list all recent updates to the game.  
-**IMPORTANT: THIS COMMAND IS GETTING DEPRECIATED**
-
-4. MTD - Shows some data about your gameplay.  
+3. MTD - Shows some data about your gameplay.  
 MTD takes no argument, all you need to enter is `MTD`  
 Shows several data about your gameplay, such as command usage, total level, total pwas, total command fail (yes we count that :D)
 
-5. END - Stop the program and exit
+4. END - Stop the program and exit
 END takes no argument, all you need to enter is `END`  
 End the program and exit, changes are saved.
 
-6. BAL - Show your pwacoin balance!
+5. BAL - Show your pwacoin balance!
 BAL takes no argument, all you need to enter is `BAL`  
 Show your pwacoin (the in game currency) balance
 
-7. ACH - Show all achievements
+6. ACH - Show all achievements
 ACH takes no argument, all you need to enter is `ACH`  
 Show all achievements. Apparently there is no sorting or filtering
 
-8. AIF - View information on a specific achievement  
+7. AIF - View information on a specific achievement  
 AIF takes one argument - the achievement name  
 `AIF "<name>"`  
 **Tags**: Name carefully, Use Quotes  
 Show specific info on an achievement
 
-9. DLY - Claim daily reward
+8. DLY - Claim daily reward
 DLY takes no argument, all you need to enter is `DLY`
 Claim your daily reward, rewards are random 
 
-10. INF - Show information on your alpaca  
+9. INF - Show information on your alpaca  
 INF takes one argument - the alpaca name  
 `INF <name>`  
 **Tags**: Name carefully  
 Show your alpaca's details and statistics
 
-11. FED - Feed the alpaca
+10. FED - Feed the alpaca
 FED takes two arguments - the alpaca name and the amount  
 `FED <name> <amount>`  
 **Tags**: Name carefully, Costs money, Valid integer  
 Feed the alpaca given to level them up  
 
-12. PWA - Let them PWA!
+11. PWA - Let them PWA!
 PWA takes two arguments - the alpaca name and the amount  
 `PWA <name> <amount>`  
 **Tags**: Name carefully, Valid integer  
-Let the alpaca says pwa =D  
+Let the alpaca says "PWA" =D  
 
-13. PLY - Play with your alpaca!
+12. PLY - Play with your alpaca!
 PLY takes one argument - the alpaca name  
 `PLY <name>`  
 **Tags**: Name carefully, Costs money  
 Play with your alpaca, they will pwa and gain a random amount of xp
 
-14. ADD - Grow your herd! Add another alpaca!  
+13. ADD - Grow your herd! Add another alpaca!  
 ADD takes one argument - the alpaca name  
 `ADD <name>`  
 **Tags**: Name carefully, Costs money  
 Add another alpaca into your herd
 
-15. LNP - Show your alpaca formation!  
+14. LNP - Show your alpaca formation!  
 LNP takes no argument, all you need to enter is `LNP`  
 All your alpacas will introduce themselves with their own statistics.
 
@@ -116,13 +112,60 @@ Yes, I ALSO know that C++26 is not even done, but gnu had indeed made its featur
 Trust me on the `-std=c++26 -lstdc++exp -O3` fr =D  
 No other setup is needed, just clone the repository and compile the file
 
-## Real talk...
+## Final notes
 This is a personal hobby project not made for any assignment at all and gotta say, it was fun!
 I will not put any licensing on this project, at least in the short term future, meaning: All rights reserved
 That being said please do not distribute the code or game without my consent and credit for me
 =D
 
+<br>
+<br>
+
+-----------------------------------------------------------------------
 # BELOW IS SEVERAL EXTRAS, YOU MAY NOT FIND THIS SECTION INTERESTING  
+
 ## COMMAND EXTRA: ADMIN
 The `ADMIN` command takes a non fixed amount of arguments and follow a fixed schema, several options include  
 `ADMIN "Save clear"`, delete the save currently loaded without going through the usual pathway  
+
+## IMPLEMENTATION DETAILS
+*These are specific implementation details of the system*  
+
+**Setup and loading**
+- The program initializes by loading save file `save1.txt`, if this file does not exist then it is considered a new save
+    - If it is a new save, everything is fresh, there will be an introductory (onboarding) sequence to teach the players on the mechanics of the game and award them their first alpaca (see: `PWALAND::welcome`)
+    - If there is an existing save, the program will check the save file version (see: `SAVE_VERSION`, this is crucial for save file integrity), all information related to Alpacas, metadata, anything that cannot be derived from other parts will be loaded from the file.
+    - If for any reason there is a mismatch on the save file version or the save file cannot be opened, the program will inform the user and start fresh
+- Other important parts that can be derived from other loaded data (such as achievements deriving on metadata), this derivation will happen silently before the main game loop.
+
+**Input layer:**
+- The player inputs and enter commands through the terminal, each line is received by the command registry (See: `class command_system`) independently
+- Within the command registry, the **parser** is called. This simple parser has two modes, specifically the **default** (with spaces as delimiters) and **quoted** (within double quotes, everything is included in one token)
+- These tokens are returned as an `std::vector<std::string>`, the arguments. The first token (meaning, the command name) is used to determine what command is called.
+
+**Commands layer:**
+- The commands receive the argument lists and verify their own arguments
+    - Most commands (with exemptions) will verify if the size of the argument list (meaning, the number of arguments passed) with the needed arguments
+    - Then each argument's validity is examined.
+    - Numeric arguments are converted from `std::string` to `int` using `util::str_to_num`, returning an `std::expected<int, std::string>`. Numbers must be a **valid integer**, **lower than 1e4** and **does not have any trailing or in-between characters**
+    - Name arguments (meaning: alpaca or achievement names) are checked inside `achievements_mana::show` or using `herd::findpwa` depending on the semantic meaning and contexts (**Important**: Names are **case sensitive** and there is **no matching**)
+    - Other exclusive argument may be checked differently, refer to the `HLP` command (during gameplay) or the brief on commands above
+    - A command can take no argument
+- After checking validity, the command executes according to its purpose, calling other system parts
+- Internally, the command registry is implemented using an unordered map of name to callables taking a vector of strings (the arguments) returning void if successful and a string (error message) if an error occurred, specifically `std::unordered_map<std::string, std::function<std::expected<void, std::string(std::vector<std::string>)>>`. If an error occurred, the function will exit early, returning an error string, which the command registry will output to the terminal
+
+**The herd and alpacas**
+- The herd serves as an **interface** to each individual alpacas with utility functions such as `pwafind` returning a pointer to the individual alpaca or iterate through the alpaca herd for commands like `LNP`
+- The herd will receive calls mainly from the command registry in order to interact with the alpacas.
+- The herd is internally implemented using an unordered map of name to alpacas, specifically `std::unordered_map<std::string, Alpaca>`
+- Each individual Alpacas stores individual state like `pwatimes`, the number of times it had pwa-ed or levels and personal ID. It will also contain the behaviors of the alpacas such as responding to feeding, leveling up, etc. (see: `class Alpaca`)
+
+**Metadata and Achievements**
+- The metadata stores all information regarding your gameplay or your alpaca herd with a general use for **viewing** and **checking achievements**
+- The metadata system is implemented using an unordered map of category names to categories, with categories being a map of metadata name to value, specifically `std::unordered_map <std::string, std::map<std::string, long long>>` with several layers of abstraction down to several command calls through `class metause`, most of which starts with the prefix `get-` or `log-`, though there are other commands such as `saveto()`, `loadin()` or `listout` (see: `class metause`)
+- Achievements rely solely on metadata with several helper commands to be called from the outside and internal helpers such as `hide()` to hide several secret achievements or `class req` providing a convenient template to help with the adding of new achievements to the achievement list.
+- The achievement list is implemented using an unordered map of name to achievements, specifically `std::unordered_map<std::string, Achievements>` with helper functions for external or internal usage.
+
+**Miscellaneous Components**
+- The save system overrides the previous save, saving to file `save1.txt` under a fixed scheme
+- There exists other systems such as utility functions (see: `namespace util`) or player info (such as the amount of pwacoins a player has) but is not significant enough to cover in this comprehensive overview. Please look into the code if necessary.
