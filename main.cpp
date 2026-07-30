@@ -279,10 +279,6 @@ class playerinfo {
     long long money = 0;
 
 public:
-    static playerinfo& instance() {
-        static playerinfo p;
-        return p;
-    }
     void coinup(long long amount) {money += amount;}
 
     std::expected<void,std::string> coindown (long long amount) {
@@ -295,7 +291,9 @@ public:
 
     long long getBalance() {return money;}
     void recoverBal(long long amount) {money = amount;}
+    void clear() {money = 0;}
 };
+playerinfo player;
 
 class Alpaca {
     int pwaid = 0;
@@ -340,7 +338,7 @@ class Alpaca {
     std::expected<void, std::string> feed(int times, int herdsz) {
         long long cost;
         cost = util::calc_fed_cost(herdsz);
-        auto res = playerinfo::instance().coindown(cost);
+        auto res = player.coindown(cost);
         if (!res) return std::unexpected (res.error());
         std::print("Pwa, really? You are giving me {} food? THANK YOU PWA!\n\n", times);
         while (times--) {
@@ -644,7 +642,7 @@ More recently, parser was updated to ignore leading and trailing spaces to help 
         std::string targetname = args[1];
         Alpaca* pwatarg = pwaherd.findpwa(targetname);
         if (!pwatarg) return std::unexpected("No such alpaca pwa!");
-        auto res = playerinfo::instance().coindown(10);
+        auto res = player.coindown(10);
         if (!res) return std::unexpected(res.error());
         pwatarg->play();
         return {};
@@ -665,7 +663,7 @@ More recently, parser was updated to ignore leading and trailing spaces to help 
         auto it = pwaherd.findpwa(pwaname);
         if (it) return std::unexpected("That alpaca already exist!");
         long long cost = 25 + 15 * (pwaherd.getsize()-1);
-        auto res = playerinfo::instance().coindown(cost);
+        auto res = player.coindown(cost);
         if (!res) return std::unexpected(res.error());
         std::print("Adding alpaca {} into your herd!\n\n", pwaname);
         pwaherd.addpwa(pwaname).setid(pwaherd.getsize());
@@ -675,7 +673,7 @@ More recently, parser was updated to ignore leading and trailing spaces to help 
 
     cmdsys.add("BAL", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
         if (args.size() != 1) return std::unexpected(std::format("Expected 0 arguments, got {}", args.size()-1));
-        long long balance = playerinfo::instance().getBalance();
+        long long balance = player.getBalance();
         std::print("Your balance is {} pwacoins\n", balance);
         return {};
     });
@@ -718,7 +716,7 @@ More recently, parser was updated to ignore leading and trailing spaces to help 
         assert(reward_place != chance.end());
         int reward = reward_place->pwacoins;
         std::print("You got... {} PWACOINS! Come back tomorrow for more prices!\n", reward);
-        playerinfo::instance().coinup(reward);
+        player.coinup(reward);
         meta.loglastdaily(util::get_date());
         return {};
     });
@@ -796,7 +794,7 @@ class PWALAND {
             int nAlpacas;
             long long coinmount;
             load >> coinmount >> nAlpacas;
-            playerinfo::instance().recoverBal(coinmount);
+            player.recoverBal(coinmount);
             pwaherd.recoverpwa(nAlpacas, load);
             meta.loadin(load);
             std::print("Pwa data recovered!\n");
@@ -880,8 +878,7 @@ Do... do you still want to say goodbye?
             util::delay(500);
             std::filesystem::remove("save1.txt");
             pwaherd.clear();
-            auto i = playerinfo::instance().coindown(playerinfo::instance().getBalance());
-            assert(i);
+            player.clear();
             std::print("Until... Gone was the world you built...\n");
             util::delay(5000);
             std::print("\n\nAnd indeed... We guess...\n");
@@ -925,7 +922,7 @@ Do... do you still want to say goodbye?
         auto spincake = std::ranges::find_if(tickets, [&sum, holy_judgement](const auto& c) {sum += c.weight; return sum > holy_judgement;});
         std::string data = spincake->dat;
         std::print("{}\n", data);
-        playerinfo::instance().coinup(pwacoins);
+        player.coinup(pwacoins);
     }
 
     void save_file() {
@@ -933,7 +930,7 @@ Do... do you still want to say goodbye?
         if (save) {
             save << SAVE_VERSION << '\n';
             save << meta.getlastdaily() << '\n';
-            save << playerinfo::instance().getBalance() << '\n';
+            save << player.getBalance() << '\n';
             save << pwaherd.getsize() << '\n';
             pwaherd.savepwa(save);
             meta.saveto(save);
