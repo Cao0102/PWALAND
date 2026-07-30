@@ -22,6 +22,44 @@
 
 constexpr int SAVE_VERSION = 3;
 
+namespace util {
+    void delay(int ms) {std::this_thread::sleep_for(std::chrono::milliseconds(ms));}
+    int get_date() {
+        auto now = std::chrono::system_clock::now();
+        auto today = std::chrono::floor<std::chrono::days>(now);
+        std::chrono::year_month_day date{today};
+        int year = (int) date.year();
+        int month = (unsigned int) date.month();
+        int day = (unsigned int) date.day();
+        return year*10'000 + month*100 + day;
+    }
+    void clearo() {
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    }
+    bool if_save_exist() {
+        return std::filesystem::exists("save1.txt");
+    }
+    int rng() {
+        static std::random_device rd;
+        static std::mt19937 gen(rd());
+        static std::uniform_int_distribution<int> rand(1, 100);
+        return rand(gen);
+    }
+    std::expected<int, std::string> str_to_num(const std::string& str) {
+        int value;
+        auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value);
+        if (ec == std::errc::invalid_argument) return std::unexpected("Pwa? Isn't this supposed to be... a numbber?");
+        if (ec == std::errc::result_out_of_range || value >= 10000) return std::unexpected("Pwa... big number...");
+        if (value < 0) return std::unexpected("But pwa no learn negative numbers!");
+        if (value == 0) return std::unexpected("Pwa why would you do something 0 times?");
+        if (ptr != str.data() + str.size()) return std::unexpected("Tricky owner sneak trailing characters!");
+        return value;
+    }
+    std::string Argnum_err(int expect, int got) {return std::format("Expected {} {}, got {}", expect, expect == 1 ? "argument" : "arguments", got);}
+    std::string Nopwa_err() {return "No such alpaca pwa!";}
+}
+
 namespace sc {
     constexpr auto cmd = "Commands";
     constexpr auto pwa = "Alpaca";
@@ -94,45 +132,6 @@ public:
     long long getlastdaily() { return mtd.get(sc::spc, "ldaily"); }
 };
 metause meta;
-
-namespace util {
-    void delay(int ms) {std::this_thread::sleep_for(std::chrono::milliseconds(ms));}
-    int get_date() {
-        auto now = std::chrono::system_clock::now();
-        auto today = std::chrono::floor<std::chrono::days>(now);
-        std::chrono::year_month_day date{today};
-        int year = (int) date.year();
-        int month = (unsigned int) date.month();
-        int day = (unsigned int) date.day();
-        return year*10'000 + month*100 + day;
-    }
-    void clearo() {
-        std::cin.clear();
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    }
-    bool if_save_exist() {
-        return std::filesystem::exists("save1.txt");
-    }
-    int rng() {
-        static std::random_device rd;
-        static std::mt19937 gen(rd());
-        static std::uniform_int_distribution<int> rand(1, 100);
-        return rand(gen);
-    }
-    long long calc_fed_cost(int herdsz) {
-        return meta.getlvl() + herdsz*5 - std::min(meta.getpwa()/50000, (long long) herdsz*3);
-    }
-    std::expected<int, std::string> str_to_num(const std::string& str) {
-        int value;
-        auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value);
-        if (ec == std::errc::invalid_argument) return std::unexpected("Pwa? Isn't this supposed to be... a numbber?");
-        if (ec == std::errc::result_out_of_range || value >= 10000) return std::unexpected("Pwa... big number...");
-        if (value < 0) return std::unexpected("But pwa no learn negative numbers!");
-        if (value == 0) return std::unexpected("Pwa why would you do something 0 times?");
-        if (ptr != str.data() + str.size()) return std::unexpected("Tricky owner sneak trailing characters!");
-        return value;
-    }
-}
 
 class Achievements {
     std::string name;
@@ -335,7 +334,7 @@ class Alpaca {
 
     std::expected<void, std::string> feed(int times, int herdsz) {
         long long cost;
-        cost = util::calc_fed_cost(herdsz);
+        cost = meta.getlvl() + herdsz*5 - std::min(meta.getpwa()/50000, (long long) herdsz*3);
         auto res = player.coindown(cost);
         if (!res) return std::unexpected (res.error());
         std::print("Pwa, really? You are giving me {} food? THANK YOU PWA!\n\n", times);
@@ -460,7 +459,7 @@ public:
         if (!parseres) return std::unexpected(parseres.error());
         auto& args = parseres.value();
         auto check = find(args[0]);
-        if (!check) return std::unexpected("No such command exist!");
+        if (!check) return std::unexpected("No such command exists!");
         auto cmdrun = *check;
         auto res = cmdrun(args);
         if (!res) return std::unexpected(res.error());
@@ -485,13 +484,9 @@ public:
         return it->second;
     }
 
-    int getsize() {
-        return pwaherd.size();
-    }
+    int getsize() {return pwaherd.size();}
 
-    void intro() {
-        for (auto& [_, pwa] : pwaherd) pwa.intro();
-    }
+    void intro() {for (auto& [_, pwa] : pwaherd) pwa.intro();}
 
     void recoverpwa(int nAlpacas, std::ifstream& in) {
         for (int i = 0; i < nAlpacas; i++) {
@@ -509,17 +504,23 @@ public:
     void clear() {pwaherd.clear();}
 };
 
+class gameplay {
+    // This class contains the special gameplay elements that are not significant enough to have a seperate class
+public:
+
+};
+
 command_system cmdres(herd& pwaherd) {
     command_system cmdsys;
     cmdsys.add("HLP", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
-        if (args.size() != 1) return std::unexpected(std::format("Expected 0 argumments, got {}", args.size()-1));
+        if (args.size() != 1) return std::unexpected(util::Argnum_err(0, args.size()-1));
         std::print(R"(
 
 COMMANDS GUIDE
 ----------------------------------
 
 1. General commands
-HLP - The help command, show commands details
+HLP - The help command, show command details
 FAQ - Common questions and errors
 MTD - Shows some data about your gameplay.
 END - Stop the program and exit, progress is indeed saved
@@ -544,14 +545,14 @@ More coming soon! =)
     });
 
     cmdsys.add("MTD", [](std::vector<std::string>& args) -> std::expected<void, std::string> {
-        if (args.size() != 1) return std::unexpected(std::format("Expected 0 arguments, got {}", args.size()-1));
+        if (args.size() != 1) return std::unexpected(util::Argnum_err(0, args.size()-1));
         meta.listout();
         return {};
     });
 
 
     cmdsys.add("FAQ", [](std::vector<std::string>& args) -> std::expected<void, std::string> {
-        if (args.size() != 1) return std::unexpected(std::format("Expected 0 arguments, got {}", args.size()-1));
+        if (args.size() != 1) return std::unexpected(util::Argnum_err(0, args.size()-1));
         std::print (R"( 
 
 Frequently Asked Questions
@@ -566,7 +567,7 @@ One way to avoid this is to save regularly and do not make changes to the projec
 Always use the END command to save before closing the terminal.
 Progress will only be saved when using this command.
 
-Q: I entered the right arguments, why does it say no such alpaca / command exist?
+Q: I entered the right arguments, why does it say no such alpaca / command exists?
 A: There is a good chance you are mixing lowercase and uppercase.
     If you are entering a command, all letters uppercase
     If you are entering an alpaca, case sensitive and be exact
@@ -584,10 +585,10 @@ More recently, parser was updated to ignore leading and trailing spaces to help 
     });
 
     cmdsys.add("FED", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
-        if (args.size() != 3) return std::unexpected(std::format("Expected 2 arguments, got {}", args.size()-1));
+        if (args.size() != 3) return std::unexpected(util::Argnum_err(2, args.size()-1));
         std::string& targetname = args[1];
         Alpaca* pwatarg = pwaherd.findpwa(targetname);
-        if (!pwatarg) return std::unexpected("No such alpaca pwa");
+        if (!pwatarg) return std::unexpected(util::Nopwa_err());
 
         auto numres = util::str_to_num(args[2]);
         if (!numres) return std::unexpected(numres.error());
@@ -599,10 +600,10 @@ More recently, parser was updated to ignore leading and trailing spaces to help 
     });
 
     cmdsys.add("PWA", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
-        if (args.size() != 3) return std::unexpected(std::format("Expected 2 arguments, got {}", args.size()-1));
+        if (args.size() != 3) return std::unexpected(util::Argnum_err(2, args.size()-1));
         std::string targetname = args[1];
         Alpaca* pwatarg = pwaherd.findpwa(targetname);
-        if (!pwatarg) return std::unexpected("No such alpaca pwa!");
+        if (!pwatarg) return std::unexpected(util::Nopwa_err());
 
         auto numres = util::str_to_num(args[2]);
         if (!numres) return std::unexpected(numres.error());
@@ -612,10 +613,10 @@ More recently, parser was updated to ignore leading and trailing spaces to help 
     });
 
     cmdsys.add("PLY", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
-        if (args.size() != 2) return std::unexpected(std::format("Expected 1 arguments, got {}", args.size()-1));
+        if (args.size() != 2) return std::unexpected(util::Argnum_err(1, args.size()-1));
         std::string targetname = args[1];
         Alpaca* pwatarg = pwaherd.findpwa(targetname);
-        if (!pwatarg) return std::unexpected("No such alpaca pwa!");
+        if (!pwatarg) return std::unexpected(util::Nopwa_err());
         auto res = player.coindown(10);
         if (!res) return std::unexpected(res.error());
         pwatarg->play();
@@ -623,19 +624,19 @@ More recently, parser was updated to ignore leading and trailing spaces to help 
     });
 
     cmdsys.add("INF", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
-        if (args.size() != 2) return std::unexpected(std::format("Expected 1 arguments, got {}", args.size()-1));
+        if (args.size() != 2) return std::unexpected(util::Argnum_err(1, args.size()-1));
         std::string pwaname = args[1];
         auto it = pwaherd.findpwa(pwaname);
-        if (!it) return std::unexpected("No such alpaca!");
+        if (!it) return std::unexpected(util::Nopwa_err());
         it->intro();
         return {};
     });
 
     cmdsys.add("ADD", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
-        if (args.size() != 2) return std::unexpected(std::format("Expected 1 arguments, got {}", args.size()-1));
+        if (args.size() != 2) return std::unexpected(util::Argnum_err(1, args.size()-1));
         std::string pwaname = args[1];
         auto it = pwaherd.findpwa(pwaname);
-        if (it) return std::unexpected("That alpaca already exist!");
+        if (it) return std::unexpected("That alpaca already exists!");
         long long cost = 25 + 15 * (pwaherd.getsize()-1);
         auto res = player.coindown(cost);
         if (!res) return std::unexpected(res.error());
@@ -646,21 +647,21 @@ More recently, parser was updated to ignore leading and trailing spaces to help 
     });
 
     cmdsys.add("BAL", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
-        if (args.size() != 1) return std::unexpected(std::format("Expected 0 arguments, got {}", args.size()-1));
+        if (args.size() != 1) return std::unexpected(util::Argnum_err(0, args.size()-1));
         long long balance = player.getBalance();
         std::print("Your balance is {} pwacoins\n", balance);
         return {};
     });
 
     cmdsys.add("LNP", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
-        if (args.size() != 1) return std::unexpected(std::format("Expected 0 arguments, got {}", args.size()-1));
+        if (args.size() != 1) return std::unexpected(util::Argnum_err(0, args.size()-1));
         std::print("March! March! Pwa... Introduce!\nPwacount: {}!\n\n", pwaherd.getsize());
         pwaherd.intro();
         return {};
     });
 
     cmdsys.add("ACH", [](std::vector<std::string>& args) -> std::expected<void, std::string> {
-        if (args.size() != 1) return std::unexpected(std::format("Expected 0 arguments, got {}", args.size()-1));
+        if (args.size() != 1) return std::unexpected(util::Argnum_err(0, args.size()-1));
         std::print("\nPWA ACHIEVEMENTS!\n=======================================\n\n");
         achieve_list.list_out();
         return {};
@@ -668,7 +669,7 @@ More recently, parser was updated to ignore leading and trailing spaces to help 
 
     cmdsys.add("AIF", [](std::vector<std::string>& args) -> std::expected<void, std::string> {
         //this one is a pain in hell
-        if (args.size() != 2) return std::unexpected(std::format("Expected 1 arguments, got {}", args.size()-1));
+        if (args.size() != 2) return std::unexpected(util::Argnum_err(1, args.size()-1));
         std::string target = args[1];
         auto res = achieve_list.show(target);
         if (!res) return std::unexpected(res.error());
@@ -676,7 +677,7 @@ More recently, parser was updated to ignore leading and trailing spaces to help 
     });
 
     cmdsys.add("DLY", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
-        if (args.size() != 1) return std::unexpected(std::format("Expected 0 arguments, got {}", args.size()-1));
+        if (args.size() != 1) return std::unexpected(util::Argnum_err(0, args.size()-1));
         int lastDaily = meta.getlastdaily();
         if (util::get_date() - lastDaily < 1) return std::unexpected("Awww you already take your daily rewards today...");
         struct ticket {
@@ -697,7 +698,7 @@ More recently, parser was updated to ignore leading and trailing spaces to help 
 
     cmdsys.add("DEV", [](std::vector<std::string>& args) -> std::expected<void, std::string> {
         /// THIS COMMAND IS HIDDEN AND DELIBERATELY UNDOCUMENTED
-        if (args.size() != 1) return std::unexpected(std::format("Expected 0 arguments, got {}\n", args.size()-1));
+        if (args.size() != 1) return std::unexpected(util::Argnum_err(0, args.size()-1));
         std::print(R"(
 Oh... You are here? Interesting... Let's break away from the normal game for a moment and talk shall we?
 How did you find this?
@@ -726,7 +727,7 @@ Do you like it? [Y/N]
     });
 
     cmdsys.add("END", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
-        if (args.size() != 1) return std::unexpected(std::format("Expected 0 arguments, got {}", args.size()-1));
+        if (args.size() != 1) return std::unexpected(util::Argnum_err(0, args.size()-1));
         std::print("Pwa, goodbye that fast?\n");
         return std::unexpected("Ending");
     });
@@ -773,7 +774,7 @@ class PWALAND {
             meta.loadin(load);
             std::print("Pwa data recovered!\n");
         }
-        else return std::unexpected("Pwa... System error... File loaded unsuccessfully");
+        else return std::unexpected("Pwa... System error... Failed to load save file");
 
         load.close();
         return {};
