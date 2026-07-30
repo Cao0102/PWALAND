@@ -20,7 +20,7 @@
 #include <thread>
 #include <array>
 
-constexpr int SAVE_VERSION = 2;
+constexpr int SAVE_VERSION = 3;
 
 namespace sc {
     constexpr auto cmd = "Commands";
@@ -218,8 +218,6 @@ public:
         add( "Forgetful man", "Use the HLP command more than 10 times", req.cmd("HLP", 10));
         add( "Confused dude", "Use the FAQ command", req.cmd("FAQ", 1));
         add( "So many weird things!", "Use the FAQ command more than 10 times", req.cmd("FAQ", 10));
-        add( "Curious person", "Use the JGL command", req.cmd("JGL", 1));
-        add( "Update inspector", "Use the JGL command more than 10 times", req.cmd("JGL", 10));
         add( "Ooh? New dashboard?", "Use the MTD command", req.cmd("MTD", 1));
         add( "Obsessive checker", "Use the MTD command more than 10 times", req.cmd("MTD", 10));
         add( "Awww too little money", "Use the BAL command", req.cmd("BAL", 1));
@@ -523,7 +521,6 @@ COMMANDS GUIDE
 1. General commands
 HLP - The help command, show commands details
 FAQ - Common questions and errors
-JGL - Show the changelog for the recent updates.
 MTD - Shows some data about your gameplay.
 END - Stop the program and exit, progress is indeed saved
 
@@ -583,29 +580,6 @@ A: No, at least not yet, for now:
 More recently, parser was updated to ignore leading and trailing spaces to help safer parsing
 
 )");
-        return {};
-    });
-
-    cmdsys.add("JGL", [](std::vector<std::string>& args) -> std::expected<void, std::string> {
-        // DEPRECIATED
-        if (args.size() != 1) return std::unexpected(std::format("Expected 0 arguments, got {}", args.size()-1));
-        struct v_log {
-            int large_v;
-            int small_v;
-            std::string date;
-            std::string contents;
-        };
-        static std::vector<v_log> changelogs = {
-            {
-                5, 0, "Jn21, 2026",
-                "FIVE. DOT. OH. Added achievements, you can use the ACH command to view all of them. Also: use AIF "
-                "to view each specific achievement (though that is fragile). Anyways final fulfillment to: the grand"
-                "... implementation 5!"
-            }
-        };
-
-        for (auto& log : changelogs) std::print("\n{}: Version {}.{}\n{}\n", log.date, log.large_v, log.small_v, log.contents);
-
         return {};
     });
 
