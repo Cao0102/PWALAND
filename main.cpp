@@ -72,7 +72,7 @@ class GameAbstract {
 public:
     void logpwa(int x) { mtd.log(categories::pwa, "pwa") += x; }
     void loglvl(int x) { mtd.log(categories::pwa, "lvl") += x; }
-    void logfail() { mtd.log(categories::spc, "fail")++; }
+    void logfail() { mtd.log(categories::spc, "Wrong Commands")++; }
     void logcmd(std::string cmd) { mtd.log(categories::cmd, cmd)++; }
     void loglastdaily(int date) { mtd.log(categories::spc, "Last daily received") = date; }
     void saveto(std::ofstream& out) { mtd.printout(out); }
@@ -81,7 +81,7 @@ public:
     long long getlvl() { return mtd.see(categories::pwa, "lvl"); }
     long long getpwa() { return mtd.see(categories::pwa, "pwa"); }
     long long getcmd(std::string cmd) { return mtd.see(categories::cmd, cmd); }
-    long long getfail() { return mtd.see(categories::spc, "fail"); }
+    long long getfail() { return mtd.see(categories::spc, "Wrong Commands"); }
     long long getlastdaily() { return mtd.see(categories::spc, "Last daily received"); }
 };
 GameAbstract meta;
@@ -265,6 +265,7 @@ class Alpaca {
         std::print("Pwa hi! Pwa's id is {}!\n", newid);
         pwaid = newid;
         pwatimes += 2;
+        meta.logpwa(2);
     }
 
     void pwa(int times) {
