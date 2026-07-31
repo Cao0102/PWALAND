@@ -490,7 +490,7 @@ public:
     void clear() {pwaherd.clear();}
 };
 
-class gameplay {
+class Gameplay {
     // This class contains the special gameplay elements that are not significant enough to have a seperate class
 public:
     void adventure(long long Entry) {
@@ -569,7 +569,15 @@ public:
         std::print("You really reached the end! Yay!!!\nYou got the grand jackpot of {}! Your total prize is {} pwacoins!\nBye!", Coins_Gained, player.getBalance());
     }
 };
-gameplay games;
+Gameplay games;
+
+class Config {
+public:
+    void run() {
+
+    }
+};
+Config setup;
 
 CommandSystem setup_commands(herd& pwaherd) {
     CommandSystem cmdsys;
