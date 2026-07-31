@@ -565,7 +565,7 @@ public:
                 std::print("{}\nYou lost the adventure!", Q.Wrong);
                 return;
             }
-            Coins_Gained += 20 + 15*i + util::rng()/10;
+            Coins_Gained += 20 + 10*i + util::rng()/10;
             std::print("{}\nYour prize pool is now {} pwacoins! Do you want to continue for better prizes, or end the game now [Y/N]?\nCONTINUE?> ", Q.Correct, Coins_Gained);
             std::string response;
             std::getline(std::cin, response);
@@ -578,7 +578,7 @@ public:
             }
             std::print("Proceeding to the next question!\n");
         }
-        Coins_Gained += Entry*5; 
+        Coins_Gained += Entry*3; 
         player.coinup(Coins_Gained);
         std::print("You really reached the end! Yay!!!\nYou got the grand jackpot of {}! Your total prize is {} pwacoins!\nBye!", Coins_Gained, player.getBalance());
     }
@@ -756,7 +756,9 @@ More recently, parser was updated to ignore leading and trailing spaces to help 
 
     cmdsys.add("ADV", [](std::vector<std::string>& args) -> std::expected<void, std::string> {
         if (args.size() != 1) return std::unexpected(util::Argnum_err(0, args.size()-1));
-        long long Entryfee = 20*meta.getcmd("ADV") + 70;
+        long long Entryfee = 100;
+        int times = meta.getcmd("ADV");
+        while(times--) Entryfee = Entryfee*21/20;
         auto result = player.coindown(Entryfee);
         if (!result) return std::unexpected(result.error());
         games.adventure(Entryfee);
