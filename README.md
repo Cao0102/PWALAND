@@ -32,6 +32,7 @@ As you see, `FED` is the command name, this refers to the feeding command.
 **Use quotes**: Use quotation mark to ensure correct parsing
 **Cost money**: This operation will cost money
 **Valid integer**: You must enter a valid positive integer that is numeral and below 10000
+**All or nothing**: This activity includes an all or nothing mechanic
 
 1. HLP - The help command, show commands details  
 HLP takes no argument, all you need to enter is `HLP`  
@@ -63,9 +64,9 @@ AIF takes one argument - the achievement name
 **Tags**: Name carefully, Use Quotes  
 Show specific info on an achievement
 
-8. DLY - Claim daily reward
-DLY takes no argument, all you need to enter is `DLY`
-Claim your daily reward, rewards are random 
+8. DLY - Claim daily reward  
+DLY takes no argument, all you need to enter is `DLY`  
+Claim your daily reward, rewards are random  
 
 9. INF - Show information on your alpaca  
 INF takes one argument - the alpaca name  
@@ -100,6 +101,11 @@ Add another alpaca into your herd
 14. LNP - Show your alpaca formation!  
 LNP takes no argument, all you need to enter is `LNP`  
 All your alpacas will introduce themselves with their own statistics.
+
+15. ADV - Go on an adventure!  
+ADV takes no argument, all you need to enter is `ADV`  
+**Tags**: Costs money, All or nothing  
+Go on an all or nothing adventure with your alpacas and answer questions for the grand prize!  
 
 ## What language is this written in?
 The entirety of the code is written in C++26  
