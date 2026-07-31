@@ -2,63 +2,20 @@
 #include <vector>
 #include <string>
 #include <algorithm>
-#include <map>
 #include <cmath>
 #include <fstream>
 #include <filesystem>
-#include <limits>
 #include <functional>
 #include <unordered_map>
 #include <expected>
-#include <random>
 #include <format>
 #include <ranges>
 #include <cassert>
-#include <charconv>
 #include <print>
-#include <chrono>
-#include <thread>
 #include <array>
 
-constexpr int SAVE_VERSION = 3;
-
-namespace util {
-    void delay(int ms) {std::this_thread::sleep_for(std::chrono::milliseconds(ms));}
-    int get_date() {
-        auto now = std::chrono::system_clock::now();
-        auto today = std::chrono::floor<std::chrono::days>(now);
-        std::chrono::year_month_day date{today};
-        int year = (int) date.year();
-        int month = (unsigned int) date.month();
-        int day = (unsigned int) date.day();
-        return year*10'000 + month*100 + day;
-    }
-    void clearo() {
-        std::cin.clear();
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    }
-    bool save_exist() {
-        return std::filesystem::exists("save1.txt");
-    }
-    int rng() {
-        static std::random_device rd;
-        static std::mt19937 gen(rd());
-        static std::uniform_int_distribution<int> rand(1, 1000);
-        return rand(gen);
-    }
-    std::expected<int, std::string> parse_num(const std::string& str) {
-        int value;
-        auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value);
-        if (ec == std::errc::invalid_argument) return std::unexpected("Pwa? Isn't this supposed to be... a numbber?");
-        if (ec == std::errc::result_out_of_range || value >= 10000) return std::unexpected("Pwa... big number...");
-        if (value < 0) return std::unexpected("But pwa no learn negative numbers!");
-        if (value == 0) return std::unexpected("Pwa why would you do something 0 times?");
-        if (ptr != str.data() + str.size()) return std::unexpected("Tricky owner sneak trailing characters!");
-        return value;
-    }
-    std::string Argnum_err(int expect, int got) {return std::format("Expected {} {}, got {}", expect, expect == 1 ? "argument" : "arguments", got);}
-    std::string Nopwa_err() {return "No such alpaca pwa!";}
-}
+#include "constants.hpp"
+#include "utilities.hpp"
 
 namespace categories {
     constexpr auto cmd = "Commands";
@@ -67,7 +24,7 @@ namespace categories {
 }
 
 class Gamedata {
-    std::unordered_map <std::string, std::map<std::string, long long>> metadata;
+    std::unordered_map <std::string, std::unordered_map<std::string, long long>> metadata;
 
 public:
     long long& log(const std::string& category, const std::string& entry) {return metadata[category][entry];}
