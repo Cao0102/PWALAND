@@ -37,16 +37,16 @@ namespace util {
         std::cin.clear();
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     }
-    bool if_save_exist() {
+    bool save_exist() {
         return std::filesystem::exists("save1.txt");
     }
     int rng() {
         static std::random_device rd;
         static std::mt19937 gen(rd());
-        static std::uniform_int_distribution<int> rand(1, 100);
+        static std::uniform_int_distribution<int> rand(1, 1000);
         return rand(gen);
     }
-    std::expected<int, std::string> str_to_num(const std::string& str) {
+    std::expected<int, std::string> parse_num(const std::string& str) {
         int value;
         auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value);
         if (ec == std::errc::invalid_argument) return std::unexpected("Pwa? Isn't this supposed to be... a numbber?");
@@ -60,127 +60,115 @@ namespace util {
     std::string Nopwa_err() {return "No such alpaca pwa!";}
 }
 
-namespace sc {
+namespace categories {
     constexpr auto cmd = "Commands";
     constexpr auto pwa = "Alpaca";
     constexpr auto spc = "Special";
 }
 
-class dataclass {
+class Gamedata {
     std::unordered_map <std::string, std::map<std::string, long long>> metadata;
 
 public:
-    long long& use(const std::string& cat, const std::string& ent) {
-        return metadata[cat][ent];
-    }
-    long long get(const std::string& cat, const std::string& ent) const {
-        auto it = metadata.find(cat);
+    long long& log(const std::string& category, const std::string& entry) {return metadata[category][entry];}
+    long long see(const std::string& category, const std::string& entry) const {
+        auto it = metadata.find(category);
         if (it == metadata.end()) return 0;
-        auto it2 = it->second.find(ent);
+        auto it2 = it->second.find(entry);
         if (it2 == it->second.end()) return 0;
         return it2->second;
     }
-    void exp(std::ofstream& out) {
-        out << metadata.size() << '\n';
-        for (auto& [name,cat] : metadata) {
-            out << name << ' ' << cat.size() << '\n';
-            for (auto& [name,amount] : cat) {
-                out << name << ' ' << amount << '\n';
+    void export(std::ofstream& out) {
+        std::print(out, "{}\n", metadata.size());
+        for (auto& [cate_name, category] : metadata) {
+            std::print(out, "{} {}\n", cate_name, category.size());
+            for (auto& [entry_name,amount] : category) std::print(out, "{} {}\n", entry_name, amount);
+        }
+    }
+    void import(std::ifstream& in) {
+        int Category_count;
+        std::string Category;
+        int Entry_count;
+        std::string Entry;
+        long long Entry_Val;
+        in >> Category_count;
+        for (auto _ : std::views::iota(0, Category_count)) {
+            in >> Category >> Entry_count;
+            for (auto _ : std::views::iota(0, Entry_count)) {
+                in >> Entry >> Entry_Val;
+                metadata[Category][Entry] = Entry_Val;
             }
         }
     }
-    void imp(std::ifstream& in) {
-        int nCats;
-        std::string Cat;
-        int nEnt;
-        std::string Ent;
-        long long EntVal;
-        in >> nCats;
-        for (auto _ : std::views::iota(0, nCats)) {
-            in >> Cat >> nEnt;
-            for (auto _ : std::views::iota(0, nEnt)) {
-                in >> Ent >> EntVal;
-                metadata[Cat][Ent] = EntVal;
-            }
-        }
-    }
-    void say() {
+    void list() {
         std::print("\n\nPWA HERE IS YOUR METADATA\n===================================\n");
         std::print("\n1. Commands usage\n");
-        for (auto& [name, amount] : metadata[sc::cmd]) std::print("{}: {}\n", name, amount);
+        for (auto& [name, amount] : metadata[categories::cmd]) std::print("{}: {}\n", name, amount);
         std::print("\n2. Alpaca stats\n");
-        for (auto& [name, amount] : metadata[sc::pwa]) std::print("You and your pwas together had achieved {} {}\n", amount, name);
+        for (auto& [name, amount] : metadata[categories::pwa]) std::print("Your alpacas had {}-ed {} times!\n", name, amount);
         std::print("\n3. Exotic stats\n");
-        std::print("Wondered how you failed your commands {} times? Pwa!\n", metadata[sc::spc]["fail"]);
+        for (auto& [name, amount] : metadata[categories::spc]) std::print("{}: {}\n", name, amount);
     }
 };
-class metause {
-    dataclass mtd;
+class GameAbstract {
+    Gamedata mtd;
 public:
-    void logpwa(int x) { mtd.use(sc::pwa, "pwa") += x; }
-    void loglvl(int x) { mtd.use(sc::pwa, "lvl") += x; }
-    void logfail() { mtd.use(sc::spc, "fail")++; }
-    void logcmd(std::string cmd) { mtd.use(sc::cmd, cmd)++; }
-    void loglastdaily(int date) { mtd.use(sc::spc, "ldaily") = date; }
-    void saveto(std::ofstream& out) { mtd.exp(out); }
-    void loadin(std::ifstream& in) { mtd.imp(in); }
-    void listout() { mtd.say(); }
-    long long getlvl() { return mtd.get(sc::pwa, "lvl"); }
-    long long getpwa() { return mtd.get(sc::pwa, "pwa"); }
-    long long getcmd(std::string cmd) { return mtd.get(sc::cmd, cmd); }
-    long long getfail() { return mtd.get(sc::spc, "fail"); }
-    long long getlastdaily() { return mtd.get(sc::spc, "ldaily"); }
+    void logpwa(int x) { mtd.log(categories::pwa, "pwa") += x; }
+    void loglvl(int x) { mtd.log(categories::pwa, "lvl") += x; }
+    void logfail() { mtd.log(categories::spc, "fail")++; }
+    void logcmd(std::string cmd) { mtd.log(categories::cmd, cmd)++; }
+    void loglastdaily(int date) { mtd.log(categories::spc, "Last daily received") = date; }
+    void saveto(std::ofstream& out) { mtd.export(out); }
+    void loadin(std::ifstream& in) { mtd.import(in); }
+    void listout() { mtd.list(); }
+    long long getlvl() { return mtd.see(categories::pwa, "lvl"); }
+    long long getpwa() { return mtd.see(categories::pwa, "pwa"); }
+    long long getcmd(std::string cmd) { return mtd.see(categories::cmd, cmd); }
+    long long getfail() { return mtd.see(categories::spc, "fail"); }
+    long long getlastdaily() { return mtd.see(categories::spc, "Last daily received"); }
 };
-metause meta;
+GameAbstract meta;
 
-class Achievements {
+namespace achievement_state {
+    enum class Status {
+        Already,
+        JustDone,
+        NotDone
+    };
+}
+
+class Achievement {
     std::string name;
-    std::string des;
-    std::vector<std::function<bool()>> cond;
+    std::string description;
+    std::vector<std::function<bool()>> condition;
     bool completed = false;
     bool secret = false;
 
 public:
-    Achievements(
-        std::string n,
-        std::string d,
-        std::vector<std::function<bool()>> c
-    ) : name(std::move(n)),
-        des(std::move(d)),
-        cond(std::move(c)) {};
-
-    int check() {
-        if (completed) return 2;
-        if (std::ranges::all_of(cond, [](auto& c) {return c();})) {completed = true; return 1;}
-        return 0;
+    Achievement(std::string n, std::string d, std::vector<std::function<bool()>> c) : name(std::move(n)), description(std::move(d)), condition(std::move(c)) {};
+    achievement_state::Status evaluate() {
+        if (completed) return achievement_state::Status::Already;
+        if (std::ranges::all_of(condition, [](auto& c) {return c();})) {completed = true; return achievement_state::Status::JustDone;}
+        return achievement_state::Status::NotDone;
     }
-    void set_secret() {secret = true;}
-    void present() {
+    void hide() {secret = true;}
+    void info() {
         if (secret == true) return;
-        std::print("\nAchievement: {}\nDescription {}\nYou have {} this achievement!\n", name, des, (completed ? "completed" : "not completed"));
+        std::print("\nAchievement: {}\nDescription {}\nYou have {} this achievement!\n", name, description, (completed ? "completed" : "not completed"));
     }
     void complete() {std::print("\nYou have completed {}! Check AIF \"{}\" for more info!\n", name, name);}
 };
-class achievements_mana {
-    std::unordered_map<std::string, Achievements> achi;
+
+class AchievementsManager {
+    std::unordered_map<std::string, Achievement> achievement_list;
 public:
-    void add(
-        std::string name,
-        std::string des,
-        std::vector<std::function<bool()>> cond
-    )
-    {
-        achi.try_emplace(
-            name,
-            std::move(name),
-            std::move(des),
-            std::move(cond)
-        );
+    void add(std::string name, std::string description,std::vector<std::function<bool()>> conditions){
+        achievement_list.try_emplace(name, std::move(name), std::move(description), std::move(conditions));
     }
     void hide(const std::string& name) {
-        auto hide = achi.find(name);
-        assert(hide != achi.end());
-        hide->second.set_secret();
+        auto hide = achievement_list.find(name);
+        assert(hide != achievement_list.end());
+        hide->second.hide();
     }
     class requirements {
     public:
@@ -255,22 +243,21 @@ public:
     }
     std::expected<void, std::string> show (std::string& name) {
         std::print("Searching for [{}]!\n", name);
-        auto it = achi.find(name);
-        if (it == achi.end()) return std::unexpected("No such achievements\n");
-        it->second.present();
+        auto it = achievement_list.find(name);
+        if (it == achievement_list.end()) return std::unexpected("No such achievements\n");
+        it->second.info();
         return {};
     }
-    void list_out() {for (auto& [_, ach] : achi) ach.present();}
+    void list_out() {for (auto& [_, achievement] : achievement_list) achievement.info();}
     void check() {
-        for (auto& [_, ach] : achi) {
-            int res = ach.check();
-            if (res == 1) ach.complete();
+        for (auto& [_, ach] : achievement_list) {
+            achievement_state::Status result = ach.evaluate();
+            if (result == achievement_state::Status::JustDone) ach.complete();
         }
     }
-    void save_sync() {for (auto& [_, ach] : achi) int _ = ach.check();}
+    void save_sync() {for (auto& [_, achievement] : achievement_list) auto _ = achievement.evaluate();}
 };
-
-achievements_mana achieve_list;
+AchievementsManager Achievements;
 
 class playerinfo {
     long long money = 0;
@@ -279,11 +266,9 @@ public:
     void coinup(long long amount) {money += amount;}
 
     std::expected<void,std::string> coindown (long long amount) {
-        if (money >= amount) {
-            money -= amount;
-            return {};
-        }
-        else return std::unexpected(std::format("Not enough money pwa... You need {} more", amount-money));
+        if (money < amount) return std::unexpected(std::format("Not enough money pwa... You need {} more", amount-money));
+        money -= amount;
+        return {};
     }
 
     long long getBalance() {return money;}
@@ -293,6 +278,7 @@ public:
 playerinfo player;
 
 class Alpaca {
+    // will remove pwaid
     int pwaid = 0;
     int pwatimes = 0;
     int level = 0;
@@ -349,20 +335,20 @@ class Alpaca {
 
     void play() {
         std::print("Playing with {} PWA PWA!\n", name);
-        struct chance {
-            int perc;
-            int pwam;
-            int expm;
+        struct ticket {
+            int chance;
+            int pwa;
+            int exp;
         };
         int destiny = util::rng();
-        constexpr static std::array<chance, 6> shot {{ {15, 20, 20}, {20, 15, 20}, {25, 20, 15}, {30, 10, 10}, {9, 25, 25}, {1, 100, 100} }};
+        constexpr static std::array<ticket, 6> wheel {{ {150, 20, 20}, {200, 15, 20}, {250, 20, 15}, {300, 10, 10}, {90, 25, 25}, {10, 100, 100} }};
         int sum = 0;
-        auto reward_place = std::ranges::find_if(shot, [&sum, destiny](const chance& slot) {sum += slot.perc; return sum > destiny;});
-        assert(reward_place != shot.end());
+        auto reward_place = std::ranges::find_if(wheel, [&sum, destiny](const ticket& slot) {sum += slot.chance; return sum > destiny;});
+        assert(reward_place != wheel.end());
 
         auto reward = *reward_place;
-        int pwaadded = reward.pwam;
-        int xpadded = reward.expm;
+        int pwaadded = reward.pwa;
+        int xpadded = reward.exp;
         std::print("Pwa is very happy! You got {} xp and {} pwas!\n", xpadded, pwaadded);
         pwatimes += pwaadded;
         xp += xpadded;
@@ -374,30 +360,30 @@ class Alpaca {
     void intro() {
         struct ticket {
             int chance;
-            int pwamount;
+            int pwa;
             std::string contents;
         };
 
         int destiny = util::rng();
 
-        const std::array<ticket,8> BIG_SHOT = {{
-            { 24, 6, std::format("PWA! Pwa's name is {}, pwa's id is {}, pwa is level {} + {} xp, and pwa had pwa-ed {} times", name, pwaid, level, xp, pwatimes)}, 
-            { 24, 9, std::format("pwa pwa pwa... pwa is {}, with id {} and pwa pwa level {} + {} xp, pwa pwa pwa-ed {} times", name, pwaid, level, xp, pwatimes)}, 
-            { 24, 9, std::format("PWA! PWA! PWA! NAME {}! ID {}! LEVEL {}! XP {}! PWATIMES {}! PWA! PWA! PWA! PWA! PWA!", name, pwaid, level, xp, pwatimes)},
-            { 24, 6, std::format("PWA PWa Pwa pwa... name is {}, ID is {}, level is {} + {} xp, and pwa pwa-ed {} times", name, pwaid, level, xp, pwatimes)}, 
-            { 1, 20, std::format("PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA {}", name)}, 
-            { 1, 10, std::format("Pwa... {} here! Pwa??? Pwa pwa pwa pwa no tell >:(, pwa ha ha ha ha pwa pwa pwa *eat grass*", name)}, 
-            { 1, 8, std::format("And it's AL - PA - CA TIME for pwa to PWA PWA PWA pwa pwa. Pwa name is {} pwa", name)}, 
-            { 1, 10, std::format("PWA HA HA HA HA! PWA WILL PWA EVERYTHING INTO PWAS AND PWAS PWA PWA PWA. Know PWA! Pwa is {}", name)}
+        const std::array<ticket,8> wheel = {{
+            { 240, 6, std::format("PWA! Pwa's name is {}, pwa's id is {}, pwa is level {} + {} xp, and pwa had pwa-ed {} times", name, pwaid, level, xp, pwatimes)}, 
+            { 240, 9, std::format("pwa pwa pwa... pwa is {}, with id {} and pwa pwa level {} + {} xp, pwa pwa pwa-ed {} times", name, pwaid, level, xp, pwatimes)}, 
+            { 240, 9, std::format("PWA! PWA! PWA! NAME {}! ID {}! LEVEL {}! XP {}! PWATIMES {}! PWA! PWA! PWA! PWA! PWA!", name, pwaid, level, xp, pwatimes)},
+            { 240, 6, std::format("PWA PWa Pwa pwa... name is {}, ID is {}, level is {} + {} xp, and pwa pwa-ed {} times", name, pwaid, level, xp, pwatimes)}, 
+            { 10, 20, std::format("PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA {}", name)}, 
+            { 10, 10, std::format("Pwa... {} here! Pwa??? Pwa pwa pwa pwa no tell >:(, pwa ha ha ha ha pwa pwa pwa *eat grass*", name)}, 
+            { 10, 8, std::format("And it's AL - PA - CA TIME for pwa to PWA PWA PWA pwa pwa. Pwa name is {} pwa", name)}, 
+            { 10, 10, std::format("PWA HA HA HA HA! PWA WILL PWA EVERYTHING INTO PWAS AND PWAS PWA PWA PWA. Know PWA! Pwa is {}", name)}
         }};
 
         int sum = 0;
-        auto SHOTPLACE = std::ranges::find_if(BIG_SHOT, [&sum, &destiny](const auto& c) {sum += c.chance; return sum > destiny;});
-        assert(SHOTPLACE != BIG_SHOT.end());
-        auto SHOT = *SHOTPLACE;
-        pwatimes += SHOT.pwamount;
-        meta.logpwa(SHOT.pwamount);
-        std::print("{}\n",SHOT.contents);
+        auto star_result = std::ranges::find_if(wheel, [&sum, &destiny](const auto& c) {sum += c.chance; return sum > destiny;});
+        assert(star_result != wheel.end());
+        auto result = *star_result;
+        pwatimes += result.pwa;
+        meta.logpwa(result.pwa);
+        std::print("{}\n",result.contents);
         return;
     }
     void restorepwa (int lid, int lpwatimes, int llevel, long long lxp) {
@@ -410,7 +396,7 @@ class Alpaca {
     void savepwa (std::ofstream& out) {std::print(out, "{} {} {} {} {}\n", name, pwaid, pwatimes, level, xp);}
 };
 
-class command_system {
+class CommandSystem {
 public:
     using Command = std::function<std::expected<void, std::string>(std::vector<std::string>& args)>;
 private:
@@ -508,7 +494,7 @@ class gameplay {
     // This class contains the special gameplay elements that are not significant enough to have a seperate class
 public:
     void adventure(long long Entry) {
-        const int base_chance = 20; //for now
+        const int base_chance = 200; //for now
         int Coins_Gained = 0;
         std::print("\nAdventure time!\n===================================\n\n");
         struct Question {
@@ -553,7 +539,7 @@ public:
         };
         for (int i : std::views::iota(1,6)) {
             int result = util::rng();
-            auto& Q = Q_set[result/base_chance - (result == 100 ? 1 : 0)];
+            auto& Q = Q_set[result/base_chance - (result == 1000 ? 1 : 0)];
             std::print("Question {}:\n{}\n\nWhich option will you choose [A/B/C/D]?\n{}\n{}\n{}\n{}\n\nANSWER > ", i, Q.Q, Q.A, Q.B, Q.C, Q.D);
             std::string answer;
             std::getline(std::cin, answer);
@@ -565,7 +551,7 @@ public:
                 std::print("{}\nYou lost the adventure!", Q.Wrong);
                 return;
             }
-            Coins_Gained += 20 + 10*i + util::rng()/10;
+            Coins_Gained += 20 + 10*i + util::rng()/100;
             std::print("{}\nYour prize pool is now {} pwacoins! Do you want to continue for better prizes, or end the game now [Y/N]?\nCONTINUE?> ", Q.Correct, Coins_Gained);
             std::string response;
             std::getline(std::cin, response);
@@ -585,8 +571,8 @@ public:
 };
 gameplay games;
 
-command_system cmdres(herd& pwaherd) {
-    command_system cmdsys;
+CommandSystem setup_commands(herd& pwaherd) {
+    CommandSystem cmdsys;
     cmdsys.add("HLP", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
         if (args.size() != 1) return std::unexpected(util::Argnum_err(0, args.size()-1));
         std::print(R"(
@@ -668,7 +654,7 @@ More recently, parser was updated to ignore leading and trailing spaces to help 
         Alpaca* pwatarg = pwaherd.findpwa(targetname);
         if (!pwatarg) return std::unexpected(util::Nopwa_err());
 
-        auto numres = util::str_to_num(args[2]);
+        auto numres = util::parse_num(args[2]);
         if (!numres) return std::unexpected(numres.error());
         int amount = numres.value();
 
@@ -683,7 +669,7 @@ More recently, parser was updated to ignore leading and trailing spaces to help 
         Alpaca* pwatarg = pwaherd.findpwa(targetname);
         if (!pwatarg) return std::unexpected(util::Nopwa_err());
 
-        auto numres = util::str_to_num(args[2]);
+        auto numres = util::parse_num(args[2]);
         if (!numres) return std::unexpected(numres.error());
         int times = numres.value();
         pwatarg->pwa(times);
@@ -741,7 +727,7 @@ More recently, parser was updated to ignore leading and trailing spaces to help 
     cmdsys.add("ACH", [](std::vector<std::string>& args) -> std::expected<void, std::string> {
         if (args.size() != 1) return std::unexpected(util::Argnum_err(0, args.size()-1));
         std::print("\nPWA ACHIEVEMENTS!\n=======================================\n\n");
-        achieve_list.list_out();
+        Achievements.list_out();
         return {};
     });
 
@@ -749,7 +735,7 @@ More recently, parser was updated to ignore leading and trailing spaces to help 
         //this one is a pain in hell
         if (args.size() != 2) return std::unexpected(util::Argnum_err(1, args.size()-1));
         std::string target = args[1];
-        auto res = achieve_list.show(target);
+        auto res = Achievements.show(target);
         if (!res) return std::unexpected(res.error());
         return {};
     });
@@ -773,7 +759,7 @@ More recently, parser was updated to ignore leading and trailing spaces to help 
             int chance;
             int pwacoins;
         };
-        constexpr static std::array<ticket, 4> chance = {{{10, 220}, {20, 200}, {30, 150}, {40, 80}}};
+        constexpr static std::array<ticket, 4> chance = {{{100, 220}, {200, 200}, {300, 150}, {400, 80}}};
         int result = util::rng();
         int sum = 0;
         auto reward_place = std::ranges::find_if(chance, [&sum, result](const ticket& slot) {sum += slot.chance; return sum > result;});
@@ -844,7 +830,7 @@ Clear the save without having to go through the normal pathway
 
 class PWALAND {
     herd pwaherd;
-    command_system cmdsys;
+    CommandSystem cmdsys;
 
     std::expected<void, std::string> load_data() {
         std::ifstream load("save1.txt");
@@ -975,10 +961,10 @@ Do... do you still want to say goodbye?
             std::string dat;
         };
         std::array<Ticket,4> tickets = {{
-            { 33, std::format("The day ends... your alpacas had given you {} pwacoins!", pwacoins)},
-            { 33, std::format("Dusk and dawn, may the next day be peaceful, you have been awarded {} pwacoins!", pwacoins)}, 
-            { 33, std::format("Sky had faded, day had ended. You are awarded with {} pwacoins!", pwacoins)}, 
-            { 1, std::format("Secret lies upon, will you dare? You are awarded {} pwacoins...", pwacoins)}
+            { 330, std::format("The day ends... your alpacas had given you {} pwacoins!", pwacoins)},
+            { 330, std::format("Dusk and dawn, may the next day be peaceful, you have been awarded {} pwacoins!", pwacoins)}, 
+            { 330, std::format("Sky had faded, day had ended. You are awarded with {} pwacoins!", pwacoins)}, 
+            { 10, std::format("Secret lies upon, will you dare? You are awarded {} pwacoins...", pwacoins)}
         }};
         int holy_judgement = util::rng();
 
@@ -1007,13 +993,13 @@ Do... do you still want to say goodbye?
 
 public:
     void mainpart() {
-        cmdsys = cmdres(this->pwaherd);
-        achieve_list.setup();
-        if (util::if_save_exist()) {
+        cmdsys = setup_commands(pwaherd);
+        Achievements.setup();
+        if (util::save_exist()) {
             auto load_result = load_data();
             if (load_result) {
                 std::print("PWA LOAD SUCESSFUL!\n");
-                achieve_list.save_sync();
+                Achievements.save_sync();
                 welcome_back();
             }
             else {std::print("Error: {}\nPerhaps this is an internal error, for now we can restart the game\n", load_result.error()); welcome();}
@@ -1036,7 +1022,7 @@ public:
                 time_of_day %= 5;
                 if (time_of_day == 0) day_ends();
             }
-            achieve_list.check();
+            Achievements.check();
             std::print("\nUSER_COMMAND > ");
         }
 
