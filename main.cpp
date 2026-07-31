@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <cmath>
 #include <fstream>
-#include <filesystem>
 #include <functional>
 #include <unordered_map>
 #include <expected>
@@ -16,75 +15,7 @@
 
 #include "constants.hpp"
 #include "utilities.hpp"
-
-namespace categories {
-    constexpr auto cmd = "Commands";
-    constexpr auto pwa = "Alpaca";
-    constexpr auto spc = "Special";
-}
-
-class Gamedata {
-    std::unordered_map <std::string, std::unordered_map<std::string, long long>> metadata;
-
-public:
-    long long& log(const std::string& category, const std::string& entry) {return metadata[category][entry];}
-    long long see(const std::string& category, const std::string& entry) const {
-        auto it = metadata.find(category);
-        if (it == metadata.end()) return 0;
-        auto it2 = it->second.find(entry);
-        if (it2 == it->second.end()) return 0;
-        return it2->second;
-    }
-    void printout (std::ofstream& out) {
-        std::print(out, "{}\n", metadata.size());
-        for (auto& [cate_name, category] : metadata) {
-            std::print(out, "{} {}\n", cate_name, category.size());
-            for (auto& [entry_name,amount] : category) std::print(out, "{} {}\n", entry_name, amount);
-        }
-    }
-    void readin(std::ifstream& in) {
-        int Category_count;
-        std::string Category;
-        int Entry_count;
-        std::string Entry;
-        long long Entry_Val;
-        in >> Category_count;
-        for (auto _ : std::views::iota(0, Category_count)) {
-            in >> Category >> Entry_count;
-            for (auto _ : std::views::iota(0, Entry_count)) {
-                in >> Entry >> Entry_Val;
-                metadata[Category][Entry] = Entry_Val;
-            }
-        }
-    }
-    void list() {
-        std::print("\n\nPWA HERE IS YOUR METADATA\n===================================\n");
-        std::print("\n1. Commands usage\n");
-        for (auto& [name, amount] : metadata[categories::cmd]) std::print("{}: {}\n", name, amount);
-        std::print("\n2. Alpaca stats\n");
-        for (auto& [name, amount] : metadata[categories::pwa]) std::print("Your alpacas had {}-ed {} times!\n", name, amount);
-        std::print("\n3. Exotic stats\n");
-        for (auto& [name, amount] : metadata[categories::spc]) std::print("{}: {}\n", name, amount);
-    }
-};
-class GameAbstract {
-    Gamedata mtd;
-public:
-    void logpwa(int x) { mtd.log(categories::pwa, "pwa") += x; }
-    void loglvl(int x) { mtd.log(categories::pwa, "lvl") += x; }
-    void logfail() { mtd.log(categories::spc, "Wrong Commands")++; }
-    void logcmd(std::string cmd) { mtd.log(categories::cmd, cmd)++; }
-    void loglastdaily(int date) { mtd.log(categories::spc, "Last daily received") = date; }
-    void saveto(std::ofstream& out) { mtd.printout(out); }
-    void loadin(std::ifstream& in) { mtd.readin(in); }
-    void listout() { mtd.list(); }
-    long long getlvl() { return mtd.see(categories::pwa, "lvl"); }
-    long long getpwa() { return mtd.see(categories::pwa, "pwa"); }
-    long long getcmd(std::string cmd) { return mtd.see(categories::cmd, cmd); }
-    long long getfail() { return mtd.see(categories::spc, "Wrong Commands"); }
-    long long getlastdaily() { return mtd.see(categories::spc, "Last daily received"); }
-};
-GameAbstract meta;
+#include "Metadata.hpp"
 
 namespace achievement_state {
     enum class Status {

@@ -8,7 +8,8 @@
                 "-std=c++26",
                 "-fdiagnostics-color=always",
                 "-g",
-                "${fileBasename}",
+                "main.cpp",
+                "Metadata.cpp",
                 "-lstdc++exp",
                 "-o",
                 "${fileBasenameNoExtension}.exe"

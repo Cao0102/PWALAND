@@ -111,6 +111,7 @@ Go on an all or nothing adventure with your alpacas and answer questions for the
 The entirety of the code is written in C++26  
 
 ## How to compile this?
+***Please note this is now outdated, I am working to update this appropriately***
 Compile normally using C++26 and preferably a GNU compiler
 Preferred compile command: `g++ main.cpp -o game.exe -std=c++26 -lstdc++exp -O3 -Wall -Wextra -Wpedantic -Werror`
 Yes, you will complile on main.cpp
