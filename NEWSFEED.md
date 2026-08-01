@@ -3,6 +3,7 @@
 
 Au 1, 2026:
 I finally seperated Metadata into its .cpp and .hpp yay!
+Added CMake and reorganized the directory, will update README + extract more parts tomorrow ig =D
 
 Jl 31, 2026:
 I openned the newsfeed, yay!
