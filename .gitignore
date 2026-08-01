@@ -2,3 +2,4 @@ save*.txt
 *.exe
 *.obj
 *.o
+build/

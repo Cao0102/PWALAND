@@ -9,7 +9,6 @@
                 "-fdiagnostics-color=always",
                 "-g",
                 "main.cpp",
-                "Metadata.cpp",
                 "-lstdc++exp",
                 "-o",
                 "${fileBasenameNoExtension}.exe"
