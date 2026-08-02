@@ -3,6 +3,8 @@
 
 Au 2, 2026:
 Yep, i finally got `Achievements.hpp` and `.cpp` out
+And so does `Player.cpp` and `.hpp`
+After finishing up with this file-splitting I am going to focus back on features
 
 Au 1, 2026:
 I finally seperated Metadata into its .cpp and .hpp yay!

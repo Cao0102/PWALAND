@@ -15,27 +15,10 @@
 #include "utilities.hpp"
 #include "Metadata.hpp"
 #include "Achievements.hpp"
+#include "Player.hpp"
 
-class playerinfo {
-    long long money = 0;
-
-public:
-    void coinup(long long amount) {money += amount;}
-
-    std::expected<void,std::string> coindown (long long amount) {
-        if (money < amount) return std::unexpected(std::format("Not enough money pwa... You need {} more", amount-money));
-        money -= amount;
-        return {};
-    }
-
-    long long getBalance() {return money;}
-    void recoverBal(long long amount) {money = amount;}
-    void clear() {money = 0;}
-};
-playerinfo player;
 
 class Alpaca {
-    // will remove pwaid
     int pwaid = 0;
     int pwatimes = 0;
     int level = 0;
