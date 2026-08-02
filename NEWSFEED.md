@@ -1,6 +1,9 @@
 # NEWSFEED
 *This is where I put recent highlights in development of the game!*
 
+Au 2, 2026:
+Yep, i finally got `Achievements.hpp` and `.cpp` out
+
 Au 1, 2026:
 I finally seperated Metadata into its .cpp and .hpp yay!
 Added CMake and reorganized the directory, will update README + extract more parts tomorrow ig =D
