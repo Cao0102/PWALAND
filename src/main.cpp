@@ -782,7 +782,7 @@ public:
                 if (time_of_day == 0) day_ends();
             }
             Achievements.check();
-            std::print("\nUSER_COMMAND > ");
+            std::print("\n\nUSER_COMMAND > ");
         }
 
         std::print("Here is your herd info up until now\n\n");

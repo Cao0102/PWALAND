@@ -8,6 +8,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_executable(PWALAND
     src/main.cpp
     src/Metadata.cpp
+    src/Achievements.cpp
+    src/Player.cpp
 )
 
 target_include_directories(PWALAND PRIVATE include)

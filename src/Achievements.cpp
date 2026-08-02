@@ -17,7 +17,7 @@ void Achievement::info() {
     if (secret == true) return;
     std::print("\nAchievement: {}\nDescription {}\nYou have {} this achievement!\n", name, description, (completed ? "completed" : "not completed"));
 }
-void Achievement::complete() {std::print("\nYou have completed {}! Check AIF \"{}\" for more info!\n", name, name);}
+void Achievement::complete() {std::print("You have completed {}! Check AIF \"{}\" for more info!\n", name, name);}
 
 void AchievementsManager::add(std::string name, std::string description,std::vector<std::function<bool()>> conditions){
     achievement_list.try_emplace(name, std::move(name), std::move(description), std::move(conditions));
