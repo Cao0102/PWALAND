@@ -10,6 +10,7 @@ add_executable(PWALAND
     src/Metadata.cpp
     src/Achievements.cpp
     src/Player.cpp
+    src/Alpaca.cpp
 )
 
 target_include_directories(PWALAND PRIVATE include)

@@ -1,6 +1,9 @@
 # NEWSFEED
 *This is where I put recent highlights in development of the game!*
 
+Au 3, 2026:
+Separated `Alpaca.hpp` and `.cpp` out. I guess im doing this once per day heh =D
+
 Au 2, 2026:
 Yep, i finally got `Achievements.hpp` and `.cpp` out
 And so does `Player.cpp` and `.hpp`
