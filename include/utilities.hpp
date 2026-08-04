@@ -2,7 +2,6 @@
 
 #include <iostream>
 #include <string>
-#include <filesystem>
 #include <limits>
 #include <expected>
 #include <random>
@@ -25,9 +24,6 @@ namespace util {
     inline void clearo() {
         std::cin.clear();
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    }
-    inline bool save_exist() {
-        return std::filesystem::exists("save1.txt");
     }
     inline int rng() {
         static std::random_device rd;

@@ -2,10 +2,11 @@
 *This is where I put recent highlights in development of the game!*
 
 Au 4, 2026:
-Just seperated `CommandSys.cpp` and `.hpp` =D.
-Also `AlpacaHerd.hpp` and `.cpp`.
-And `Games.hpp` and `Adventure.cpp`
-And `Onboarding.hpp` and `.cpp` (dang, today's a jackpot)
+Just seperated `CommandSys.cpp` and `.hpp` =D.  
+Also `AlpacaHerd.hpp` and `.cpp`  
+And `Games.hpp` and `Adventure.cpp`  
+And `Onboarding.hpp` and `.cpp` (dang, today's a jackpot)  
+And `SaveManager.hpp` and `.cpp`  
 Almost there yay
 
 Au 3, 2026:
