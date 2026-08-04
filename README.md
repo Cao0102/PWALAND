@@ -111,13 +111,12 @@ Go on an all or nothing adventure with your alpacas and answer questions for the
 The entirety of the code is written in C++26  
 
 ## How to compile this?
-***Please note this is now outdated, I am working to update this appropriately***
-Compile normally using C++26 and preferably a GNU compiler
-Preferred compile command: `g++ main.cpp -o game.exe -std=c++26 -lstdc++exp -O3 -Wall -Wextra -Wpedantic -Werror`
-Yes, you will complile on main.cpp
-Yes, I ALSO know that C++26 is not even done, but gnu had indeed made its features and I kinda used some of them  
-Trust me on the `-std=c++26 -lstdc++exp -O3` fr =D  
-No other setup is needed, just clone the repository and compile the file
+Requirements:
+- **Compiler with C++26 support**. This is actually crucial, the code uses elements only available under the C++26 language standard.
+- **CMake 3.20 or newer**
+Instructions:
+- Build in CMake, either through your editor's extension or through terminal
+- Run the file through the executable directly or through your code editor of choice
 
 ## Final notes
 This is a personal hobby project not made for any assignment at all and gotta say, it was fun!
