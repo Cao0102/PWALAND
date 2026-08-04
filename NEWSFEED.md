@@ -5,9 +5,10 @@ Au 4, 2026:
 Just seperated `CommandSys.cpp` and `.hpp` =D.  
 Also `AlpacaHerd.hpp` and `.cpp`  
 And `Games.hpp` and `Adventure.cpp`  
+Almost there yay  
 And `Onboarding.hpp` and `.cpp` (dang, today's a jackpot)  
 And `SaveManager.hpp` and `.cpp`  
-Almost there yay
+Actually... we are there! `Initialization.hpp`, `Setup.cpp` and `CommandLoader.cpp`! Yay Tomorrow i can go back to doing features!
 
 Au 3, 2026:
 Separated `Alpaca.hpp` and `.cpp` out. I guess im doing this once per day heh =D

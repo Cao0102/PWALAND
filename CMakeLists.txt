@@ -16,6 +16,8 @@ add_executable(PWALAND
     src/Adventure.cpp
     src/Onboarding.cpp
     src/SaveManager.cpp
+    src/CommandLoader.cpp
+    src/Setup.cpp
 )
 
 target_include_directories(PWALAND PRIVATE include)
