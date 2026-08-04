@@ -8,7 +8,7 @@
 #include "Alpaca.hpp"
 #include "Player.hpp"
 #include "Metadata.hpp"
-#include "utilities.hpp"
+#include "Utilities.hpp"
 
 Alpaca::Alpaca(const std::string& n) : name(n) {}
 

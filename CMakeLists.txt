@@ -14,6 +14,7 @@ add_executable(PWALAND
     src/CommandSys.cpp
     src/AlpacaHerd.cpp
     src/Adventure.cpp
+    src/Onboarding.cpp
 )
 
 target_include_directories(PWALAND PRIVATE include)
