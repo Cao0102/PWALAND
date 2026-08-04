@@ -1,6 +1,9 @@
 # NEWSFEED
 *This is where I put recent highlights in development of the game!*
 
+Au 4, 2026:
+Just seperated `CommandSys.cpp` and `.hpp` =D
+
 Au 3, 2026:
 Separated `Alpaca.hpp` and `.cpp` out. I guess im doing this once per day heh =D
 
