@@ -4,6 +4,7 @@
 Au 4, 2026:
 Just seperated `CommandSys.cpp` and `.hpp` =D.
 Also `AlpacaHerd.hpp` and `.cpp`.
+And `Games.hpp` and `Adventure.cpp`
 Almost there yay
 
 Au 3, 2026:

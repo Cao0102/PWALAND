@@ -8,4 +8,4 @@ class Gameplay {
 public:
     void adventure(long long Entry);
 };
-extern Gameplay games;
+inline Gameplay games;
