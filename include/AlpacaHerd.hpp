@@ -1,3 +1,5 @@
+#pragma once //almost forgot
+
 #include <unordered_map>
 #include <fstream>
 #include <string>
