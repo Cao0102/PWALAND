@@ -12,6 +12,7 @@ add_executable(PWALAND
     src/Player.cpp
     src/Alpaca.cpp
     src/CommandSys.cpp
+    src/AlpacaHerd.cpp
 )
 
 target_include_directories(PWALAND PRIVATE include)

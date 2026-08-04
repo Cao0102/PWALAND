@@ -2,8 +2,6 @@
 #include <vector>
 #include <string>
 #include <fstream>
-#include <functional>
-#include <unordered_map>
 #include <expected>
 #include <ranges>
 #include <cassert>
@@ -15,43 +13,8 @@
 #include "Metadata.hpp"
 #include "Achievements.hpp"
 #include "Player.hpp"
-#include "Alpaca.hpp"
 #include "CommandSys.hpp"
-
-class herd {
-    std::unordered_map<std::string, Alpaca> pwaherd;
-public:
-    Alpaca* findpwa (const std::string name) {
-        auto it = pwaherd.find(name);
-
-        if (it == pwaherd.end()) return nullptr;
-        return &it->second;
-    }
-
-    Alpaca& addpwa (const std::string& name) {
-        auto [it, _] = pwaherd.try_emplace(name, (name));
-        return it->second;
-    }
-
-    int getsize() {return pwaherd.size();}
-
-    void intro() {for (auto& [_, pwa] : pwaherd) pwa.intro();}
-
-    void recoverpwa(int nAlpacas, std::ifstream& in) {
-        for (int i = 0; i < nAlpacas; i++) {
-            std::string lname;
-            int lid;
-            int lpwatimes;
-            int llevel;
-            long long lxp;
-            in >> lname >> lid >> lpwatimes >> llevel >> lxp;
-            addpwa(lname).restorepwa(lid, lpwatimes, llevel, lxp);
-        }
-    }
-
-    void savepwa(std::ofstream& out) {for (auto& [name, alpaca] : pwaherd) alpaca.savepwa(out);}
-    void clear() {pwaherd.clear();}
-};
+#include "AlpacaHerd.hpp"
 
 class Gameplay {
     // This class contains the special gameplay elements that are not significant enough to have a seperate class
@@ -136,7 +99,7 @@ Gameplay games;
 
 class Onboarding {
 public:
-    void welcome(herd& pwaherd) {
+    void welcome(Herd& pwaherd) {
         std::print(R"(
 PWA WELCOME TO PWALAND!
 ----------------------------------
@@ -159,7 +122,7 @@ Enter "HLP" for help!
 )");
     }
 
-    void welcome_back(herd& pwaherd) {
+    void welcome_back(Herd& pwaherd) {
         std::print ("*Sleeping pwa mumbles* \nPWA! You came back? YAY PWA! You want to continue last save though? [Y/N]\n> ");
         std::string response;
         std::cin >> response;
@@ -239,7 +202,7 @@ Onboarding welcomer;
 
 class SaveManager {
 public:
-    std::expected<void, std::string> load(herd& pwaherd) {
+    std::expected<void, std::string> load(Herd& pwaherd) {
         std::ifstream load("save1.txt");
 
         if (load.is_open()) {
@@ -262,7 +225,7 @@ public:
         return {};
     }
 
-    void save(herd& pwaherd) {
+    void save(Herd& pwaherd) {
         std::ofstream save("save1.txt");
         if (save) {
             save << SAVE_VERSION << '\n';
@@ -278,7 +241,7 @@ public:
         save.close();
     }
 
-    void savecheck(herd& pwaherd) {
+    void savecheck(Herd& pwaherd) {
         if (util::save_exist()) {
             auto load_result = load(pwaherd);
             if (load_result) {
@@ -294,7 +257,7 @@ public:
 SaveManager Save;
 
 class Config {
-    CommandSystem setup_commands(herd& pwaherd) {
+    CommandSystem setup_commands(Herd& pwaherd) {
         CommandSystem cmdsys;
         cmdsys.add("HLP", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
             if (args.size() != 1) return std::unexpected(util::Argnum_err(0, args.size()-1));
@@ -551,7 +514,7 @@ Clear the save without having to go through the normal pathway
         return cmdsys;
     }
 public:
-    void run(CommandSystem& cmdsys, herd& Alpacaherd) {
+    void run(CommandSystem& cmdsys, Herd& Alpacaherd) {
         cmdsys = setup_commands(Alpacaherd);
         Achievements.setup();
         Save.savecheck(Alpacaherd);
@@ -560,7 +523,7 @@ public:
 Config setup;
 
 class PWALAND {
-    herd pwaherd;
+    Herd pwaherd;
     CommandSystem cmdsys;
 
     void day_ends() {
