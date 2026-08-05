@@ -56,14 +56,14 @@ More coming soon! =)
         return {};
     });
 
-    cmdsys.add("MTD", [](std::vector<std::string>& args) -> std::expected<void, std::string> {
+    cmdsys.add("MTD", [](auto& args) -> std::expected<void, std::string> {
         if (args.size() != 1) return std::unexpected(util::Argnum_err(0, args.size()-1));
         meta.listout();
         return {};
     });
 
 
-    cmdsys.add("FAQ", [](std::vector<std::string>& args) -> std::expected<void, std::string> {
+    cmdsys.add("FAQ", [](auto& args) -> std::expected<void, std::string> {
         if (args.size() != 1) return std::unexpected(util::Argnum_err(0, args.size()-1));
         std::print (R"( 
 
@@ -96,7 +96,7 @@ More recently, parser was updated to ignore leading and trailing spaces to help 
         return {};
     });
 
-    cmdsys.add("FED", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
+    cmdsys.add("FED", [&](auto& args) -> std::expected<void, std::string> {
         if (args.size() != 3) return std::unexpected(util::Argnum_err(2, args.size()-1));
         std::string& targetname = args[1];
         Alpaca* pwatarg = pwaherd.findpwa(targetname);
@@ -111,7 +111,7 @@ More recently, parser was updated to ignore leading and trailing spaces to help 
         return {};
     });
 
-    cmdsys.add("PWA", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
+    cmdsys.add("PWA", [&](auto& args) -> std::expected<void, std::string> {
         if (args.size() != 3) return std::unexpected(util::Argnum_err(2, args.size()-1));
         std::string targetname = args[1];
         Alpaca* pwatarg = pwaherd.findpwa(targetname);
@@ -124,7 +124,7 @@ More recently, parser was updated to ignore leading and trailing spaces to help 
         return {};
     });
 
-    cmdsys.add("PLY", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
+    cmdsys.add("PLY", [&](auto& args) -> std::expected<void, std::string> {
         if (args.size() != 2) return std::unexpected(util::Argnum_err(1, args.size()-1));
         std::string targetname = args[1];
         Alpaca* pwatarg = pwaherd.findpwa(targetname);
@@ -135,7 +135,7 @@ More recently, parser was updated to ignore leading and trailing spaces to help 
         return {};
     });
 
-    cmdsys.add("INF", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
+    cmdsys.add("INF", [&](auto& args) -> std::expected<void, std::string> {
         if (args.size() != 2) return std::unexpected(util::Argnum_err(1, args.size()-1));
         std::string pwaname = args[1];
         auto it = pwaherd.findpwa(pwaname);
@@ -144,7 +144,7 @@ More recently, parser was updated to ignore leading and trailing spaces to help 
         return {};
     });
 
-    cmdsys.add("ADD", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
+    cmdsys.add("ADD", [&](auto& args) -> std::expected<void, std::string> {
         if (args.size() != 2) return std::unexpected(util::Argnum_err(1, args.size()-1));
         std::string pwaname = args[1];
         auto it = pwaherd.findpwa(pwaname);
@@ -158,28 +158,28 @@ More recently, parser was updated to ignore leading and trailing spaces to help 
         return {};
     });
 
-    cmdsys.add("BAL", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
+    cmdsys.add("BAL", [&](auto& args) -> std::expected<void, std::string> {
         if (args.size() != 1) return std::unexpected(util::Argnum_err(0, args.size()-1));
         long long balance = player.getBalance();
         std::print("Your balance is {} pwacoins\n", balance);
         return {};
     });
 
-    cmdsys.add("LNP", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
+    cmdsys.add("LNP", [&](auto& args) -> std::expected<void, std::string> {
         if (args.size() != 1) return std::unexpected(util::Argnum_err(0, args.size()-1));
         std::print("March! March! Pwa... Introduce!\nPwacount: {}!\n\n", pwaherd.getsize());
         pwaherd.intro();
         return {};
     });
 
-    cmdsys.add("ACH", [](std::vector<std::string>& args) -> std::expected<void, std::string> {
+    cmdsys.add("ACH", [](auto& args) -> std::expected<void, std::string> {
         if (args.size() != 1) return std::unexpected(util::Argnum_err(0, args.size()-1));
         std::print("\nPWA ACHIEVEMENTS!\n=======================================\n\n");
         Achievements.list_out();
         return {};
     });
 
-    cmdsys.add("AIF", [](std::vector<std::string>& args) -> std::expected<void, std::string> {
+    cmdsys.add("AIF", [](auto& args) -> std::expected<void, std::string> {
         //this one is a pain in hell
         if (args.size() != 2) return std::unexpected(util::Argnum_err(1, args.size()-1));
         std::string target = args[1];
@@ -188,7 +188,7 @@ More recently, parser was updated to ignore leading and trailing spaces to help 
         return {};
     });
 
-    cmdsys.add("ADV", [](std::vector<std::string>& args) -> std::expected<void, std::string> {
+    cmdsys.add("ADV", [](auto& args) -> std::expected<void, std::string> {
         if (args.size() != 1) return std::unexpected(util::Argnum_err(0, args.size()-1));
         long long Entryfee = 100;
         int times = meta.getcmd("ADV");
@@ -199,7 +199,7 @@ More recently, parser was updated to ignore leading and trailing spaces to help 
         return {};
     });
 
-    cmdsys.add("DLY", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
+    cmdsys.add("DLY", [&](auto& args) -> std::expected<void, std::string> {
         if (args.size() != 1) return std::unexpected(util::Argnum_err(0, args.size()-1));
         int lastDaily = meta.getlastdaily();
         if (util::get_date() - lastDaily < 1) return std::unexpected("Awww you already take your daily rewards today...");
@@ -219,7 +219,7 @@ More recently, parser was updated to ignore leading and trailing spaces to help 
         return {};
     });
 
-    cmdsys.add("DEV", [](std::vector<std::string>& args) -> std::expected<void, std::string> {
+    cmdsys.add("DEV", [](auto& args) -> std::expected<void, std::string> {
         /// THIS COMMAND IS HIDDEN AND DELIBERATELY UNDOCUMENTED
         if (args.size() != 1) return std::unexpected(util::Argnum_err(0, args.size()-1));
         std::print(R"(
@@ -249,13 +249,13 @@ Do you like it? [Y/N]
         return {};
     });
 
-    cmdsys.add("END", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
+    cmdsys.add("END", [&](auto& args) -> std::expected<void, std::string> {
         if (args.size() != 1) return std::unexpected(util::Argnum_err(0, args.size()-1));
         std::print("Pwa, goodbye that fast?\n");
         return std::unexpected("Ending");
     });
 
-    cmdsys.add("ADMIN", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
+    cmdsys.add("ADMIN", [&](auto& args) -> std::expected<void, std::string> {
         if (args.size() == 2 && args[1] == "Save clear") {
             std::print("\n[ADMIN] Clearing save\nRecommend pwa to restart the game\n");
             std::filesystem::remove("save1.txt");
