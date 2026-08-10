@@ -4,6 +4,7 @@
 #include <print>
 #include <array>
 #include <format>
+#include <iostream>
 
 #include "CommandSys.hpp"
 #include "AlpacaHerd.hpp"
@@ -36,7 +37,7 @@ class PWALAND {
     }
 
 public:
-    void mainpart() {
+    void start() {
         setup.run(cmdsys, pwaherd);
         std::string cmdline;
         int time_of_day = 0;
@@ -68,5 +69,5 @@ public:
 
 int main() {
     PWALAND game;
-    game.mainpart();
+    game.start();
 }
