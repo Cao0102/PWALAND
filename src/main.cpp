@@ -30,7 +30,7 @@ class PWALAND {
         int holy_judgement = util::rng();
 
         int sum = 0;
-        auto spincake = std::ranges::find_if(tickets, [&sum, holy_judgement](const auto& c) {sum += c.weight; return sum > holy_judgement;});
+        auto spincake = std::ranges::find_if(tickets, [&sum, holy_judgement](const auto& c) {sum += c.weight; return sum >= holy_judgement;});
         std::string data = spincake->dat;
         std::print("{}\n", data);
         player.coinup(pwacoins);

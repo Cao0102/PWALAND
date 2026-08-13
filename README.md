@@ -26,6 +26,17 @@ As you see, `FED` is the command name, this refers to the feeding command.
 `5` is the amount, aka how many times will you feed this alpaca?  
 **For specific implementation details, please scroll down**  
 
+## What language is this written in?
+The entirety of the code is written in C++26  
+
+## How to compile this?
+Requirements:
+- **Compiler with C++26 support**. This is actually crucial, the code uses elements only available under the C++26 language standard.
+- **CMake 3.20 or newer**  
+Instructions:  
+- Build in CMake, either through your editor's extension or through terminal
+- Run the file through the executable directly or through your code editor of choice
+
 ## What commands do we have?  
 ***Please be aware that you could also access these using the `HLP` command***  
 ***This will be updated***  
@@ -109,17 +120,6 @@ All your alpacas will introduce themselves with their own statistics.
 ADV takes no argument, all you need to enter is `ADV`  
 **Tags**: Costs money, All or nothing  
 Go on an all or nothing adventure with your alpacas and answer questions for the grand prize!  
-
-## What language is this written in?
-The entirety of the code is written in C++26  
-
-## How to compile this?
-Requirements:
-- **Compiler with C++26 support**. This is actually crucial, the code uses elements only available under the C++26 language standard.
-- **CMake 3.20 or newer**
-Instructions:
-- Build in CMake, either through your editor's extension or through terminal
-- Run the file through the executable directly or through your code editor of choice
 
 ## Final notes
 This is a personal hobby project not made for any assignment at all and gotta say, it was fun!
