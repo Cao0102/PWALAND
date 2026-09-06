@@ -2,8 +2,6 @@
 #include <vector>
 #include <string>
 #include <expected>
-#include <ranges>
-#include <cassert>
 #include <print>
 #include <array>
 #include <filesystem>
@@ -21,7 +19,7 @@
 
 CommandSystem Initialization::setup_commands(Herd& pwaherd) {
     CommandSystem cmdsys;
-    cmdsys.add("HLP", [&](std::vector<std::string>& args) -> std::expected<void, std::string> {
+    cmdsys.add("HLP", [&](auto& args) -> std::expected<void, std::string> {
         if (args.size() != 1) return std::unexpected(util::Argnum_err(0, args.size()-1));
         std::print(R"(
 
@@ -203,16 +201,7 @@ More recently, parser was updated to ignore leading and trailing spaces to help 
         if (args.size() != 1) return std::unexpected(util::Argnum_err(0, args.size()-1));
         int lastDaily = meta.getlastdaily();
         if (util::get_date() - lastDaily < 1) return std::unexpected("Awww you already take your daily rewards today...");
-        struct ticket {
-            int chance;
-            int pwacoins;
-        };
-        constexpr static std::array<ticket, 4> chance = {{{100, 220}, {200, 200}, {300, 150}, {400, 80}}};
-        int result = util::rng();
-        int sum = 0;
-        auto reward_place = std::ranges::find_if(chance, [&sum, result](const ticket& slot) {sum += slot.chance; return sum > result;});
-        assert(reward_place != chance.end());
-        int reward = reward_place->pwacoins;
+        int reward = util::w_rand<int, 100, 200, 300, 400>({220, 200, 150, 80});
         std::print("You got... {} PWACOINS! Come back tomorrow for more prices!\n", reward);
         player.coinup(reward);
         meta.loglastdaily(util::get_date());

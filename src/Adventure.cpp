@@ -51,6 +51,8 @@ void Gameplay::adventure(long long Entry) {
         }
     };
     for (int i : std::views::iota(1,6)) {
+        //this will take good use of uniform distribution
+        //tbd
         int result = util::rng();
         auto& Q = Q_set[result/base_chance - (result == 1000 ? 1 : 0)];
         std::print("Question {}:\n{}\n\nWhich option will you choose [A/B/C/D]?\n{}\n{}\n{}\n{}\n\nANSWER > ", i, Q.Q, Q.A, Q.B, Q.C, Q.D);

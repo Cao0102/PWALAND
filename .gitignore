@@ -3,3 +3,5 @@ save*.txt
 *.obj
 *.o
 build/
+vscode/launch.json
+vscode/tasks.json

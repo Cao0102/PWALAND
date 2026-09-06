@@ -1,6 +1,4 @@
 #include <cmath>
-#include <ranges>
-#include <cassert>
 #include <print>
 #include <array>
 #include <fstream>
@@ -61,17 +59,10 @@ std::expected<void, std::string> Alpaca::feed(int times, int herdsz) {
 void Alpaca::play() {
     std::print("Playing with {} PWA PWA!\n", name);
     struct ticket {
-        int chance;
         int pwa;
         int exp;
     };
-    int destiny = util::rng();
-    constexpr static std::array<ticket, 6> wheel {{ {150, 20, 20}, {200, 15, 20}, {250, 20, 15}, {300, 10, 10}, {90, 25, 25}, {10, 100, 100} }};
-    int sum = 0;
-    auto reward_place = std::ranges::find_if(wheel, [&sum, destiny](const ticket& slot) {sum += slot.chance; return sum > destiny;});
-    assert(reward_place != wheel.end());
-
-    auto reward = *reward_place;
+    auto reward = util::w_rand<ticket, 150, 200, 350, 200, 90, 10>({{ {20, 20}, {15, 20}, {20, 15}, {10, 10}, {25, 25}, {100, 100} }});
     int pwaadded = reward.pwa;
     int xpadded = reward.exp;
     std::print("Pwa is very happy! You got {} xp and {} pwas!\n", xpadded, pwaadded);
@@ -84,28 +75,23 @@ void Alpaca::play() {
 
 void Alpaca::intro() {
     struct ticket {
-        int chance;
         int pwa;
         std::string contents;
     };
 
     int destiny = util::rng();
 
-    const std::array<ticket,8> wheel = {{
-        { 240, 6, std::format("PWA! Pwa's name is {}, pwa's id is {}, pwa is level {} + {} xp, and pwa had pwa-ed {} times", name, pwaid, level, xp, pwatimes)}, 
-        { 240, 9, std::format("pwa pwa pwa... pwa is {}, with id {} and pwa pwa level {} + {} xp, pwa pwa pwa-ed {} times", name, pwaid, level, xp, pwatimes)}, 
-        { 240, 9, std::format("PWA! PWA! PWA! NAME {}! ID {}! LEVEL {}! XP {}! PWATIMES {}! PWA! PWA! PWA! PWA! PWA!", name, pwaid, level, xp, pwatimes)},
-        { 240, 6, std::format("PWA PWa Pwa pwa... name is {}, ID is {}, level is {} + {} xp, and pwa pwa-ed {} times", name, pwaid, level, xp, pwatimes)}, 
-        { 10, 20, std::format("PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA {}", name)}, 
-        { 10, 10, std::format("Pwa... {} here! Pwa??? Pwa pwa pwa pwa no tell >:(, pwa ha ha ha ha pwa pwa pwa *eat grass*", name)}, 
-        { 10, 8, std::format("And it's AL - PA - CA TIME for pwa to PWA PWA PWA pwa pwa. Pwa name is {} pwa", name)}, 
-        { 10, 10, std::format("PWA HA HA HA HA! PWA WILL PWA EVERYTHING INTO PWAS AND PWAS PWA PWA PWA. Know PWA! Pwa is {}", name)}
-    }};
+    auto result = util::w_rand<ticket, 240, 240, 240, 240, 10, 10, 10, 10>({{
+        { 6, std::format("PWA! Pwa's name is {}, pwa's id is {}, pwa is level {} + {} xp, and pwa had pwa-ed {} times", name, pwaid, level, xp, pwatimes)}, 
+        { 9, std::format("pwa pwa pwa... pwa is {}, with id {} and pwa pwa level {} + {} xp, pwa pwa pwa-ed {} times", name, pwaid, level, xp, pwatimes)}, 
+        { 9, std::format("PWA! PWA! PWA! NAME {}! ID {}! LEVEL {}! XP {}! PWATIMES {}! PWA! PWA! PWA! PWA! PWA!", name, pwaid, level, xp, pwatimes)},
+        { 6, std::format("PWA PWa Pwa pwa... name is {}, ID is {}, level is {} + {} xp, and pwa pwa-ed {} times", name, pwaid, level, xp, pwatimes)}, 
+        { 20, std::format("PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA PWA {}", name)}, 
+        { 10, std::format("Pwa... {} here! Pwa??? Pwa pwa pwa pwa no tell >:(, pwa ha ha ha ha pwa pwa pwa *eat grass*", name)}, 
+        { 8, std::format("And it's AL - PA - CA TIME for pwa to PWA PWA PWA pwa pwa. Pwa name is {} pwa", name)}, 
+        { 10, std::format("PWA HA HA HA HA! PWA WILL PWA EVERYTHING INTO PWAS AND PWAS PWA PWA PWA. Know PWA! Pwa is {}", name)}
+    }});
 
-    int sum = 0;
-    auto star_result = std::ranges::find_if(wheel, [&sum, &destiny](const auto& c) {sum += c.chance; return sum > destiny;});
-    assert(star_result != wheel.end());
-    auto result = *star_result;
     pwatimes += result.pwa;
     meta.logpwa(result.pwa);
     std::print("{}\n",result.contents);

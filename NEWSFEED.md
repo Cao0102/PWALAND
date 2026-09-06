@@ -1,6 +1,10 @@
 # NEWSFEED
 *This is where I put recent highlights in development of the game!*
 
+Se 6, 2026:
+Long update =D  
+Could work more on major things soon
+
 Au 4, 2026:
 Just seperated `CommandSys.cpp` and `.hpp` =D.  
 Also `AlpacaHerd.hpp` and `.cpp`  

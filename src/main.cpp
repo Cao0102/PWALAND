@@ -1,8 +1,5 @@
 #include <string>
-#include <ranges>
-#include <cassert>
 #include <print>
-#include <array>
 #include <format>
 #include <iostream>
 
@@ -17,22 +14,13 @@ class PWALAND {
 
     void day_ends() {
         long long pwacoins = pwaherd.getsize() * 3;
-        struct Ticket {
-            int weight;
-            std::string dat;
-        };
-        std::array<Ticket,4> tickets = {{
-            { 330, std::format("The day ends... your alpacas had given you {} pwacoins!", pwacoins)},
-            { 330, std::format("Dusk and dawn, may the next day be peaceful, you have been awarded {} pwacoins!", pwacoins)}, 
-            { 330, std::format("Sky had faded, day had ended. You are awarded with {} pwacoins!", pwacoins)}, 
-            { 10, std::format("Secret lies upon, will you dare? You are awarded {} pwacoins...", pwacoins)}
-        }};
-        int holy_judgement = util::rng();
-
-        int sum = 0;
-        auto spincake = std::ranges::find_if(tickets, [&sum, holy_judgement](const auto& c) {sum += c.weight; return sum >= holy_judgement;});
-        std::string data = spincake->dat;
-        std::print("{}\n", data);
+        auto dialogue = util::w_rand<std::string, 330, 330, 330, 10>({
+            std::format("The day ends... your alpacas had given you {} pwacoins!", pwacoins),
+            std::format("Dusk and dawn, may the next day be peaceful, you have been awarded {} pwacoins!", pwacoins), 
+            std::format("Sky had faded, day had ended. You are awarded with {} pwacoins!", pwacoins), 
+            std::format("Secret lies upon, will you dare? You are awarded {} pwacoins...", pwacoins)
+        });
+        std::print("{}\n", dialogue);
         player.coinup(pwacoins);
     }
 

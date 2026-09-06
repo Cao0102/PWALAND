@@ -9,6 +9,9 @@
 #include <charconv>
 #include <chrono>
 #include <thread>
+#include <array>
+#include <ranges>
+#include <cassert>
 
 namespace util {
     inline void delay(int ms) {std::this_thread::sleep_for(std::chrono::milliseconds(ms));}
@@ -43,4 +46,13 @@ namespace util {
     }
     inline std::string Argnum_err(int expect, int got) {return std::format("Expected {} {}, got {}", expect, expect == 1 ? "argument" : "arguments", got);}
     inline std::string Nopwa_err() {return "No such alpaca pwa!";}
+    
+    template <typename T, int... W>
+        requires((W + ...) == 1000)
+    inline T w_rand(const std::array<T, sizeof...(W)>& a) {
+        int result = rng();
+        constexpr std::array w = {W...};
+        for (int index : std::views::iota(0, w.size())) if ((result -= w[index]) <= 0) return a[index];
+        assert(false);
+    }
 }
