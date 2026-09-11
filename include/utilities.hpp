@@ -14,14 +14,21 @@
 #include <cassert>
 
 namespace util {
+    template<typename T, typename K>
+    concept Castable = requires(K x) { static_cast<T>(x); };
+    template<typename T, typename K>
+        requires Castable<T, K>
+    constexpr T to(K x) {
+        return static_cast<T>(x);
+    }
     inline void delay(int ms) {std::this_thread::sleep_for(std::chrono::milliseconds(ms));}
     inline int get_date() {
         auto now = std::chrono::system_clock::now();
         auto today = std::chrono::floor<std::chrono::days>(now);
         std::chrono::year_month_day date{today};
-        int year = (int) date.year();
-        int month = (unsigned int) date.month();
-        int day = (unsigned int) date.day();
+        int year = to<int>(date.year());
+        int month = to<unsigned int>(date.month());
+        int day = to<unsigned int>(date.day());
         return year*10'000 + month*100 + day;
     }
     inline void clearo() {
@@ -52,7 +59,7 @@ namespace util {
     inline T w_rand(const std::array<T, sizeof...(W)>& a) {
         int result = rng();
         constexpr std::array w = {W...};
-        for (int index : std::views::iota(0, w.size())) if ((result -= w[index]) <= 0) return a[index];
+        for (int index : std::views::iota(0, to<int>(w.size()))) if ((result -= w[index]) <= 0) return a[index];
         assert(false);
     }
 }
