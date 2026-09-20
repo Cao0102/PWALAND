@@ -1,6 +1,10 @@
-#include <vector>
+#include <print>
+#include <string>
+#include <utility>
+#include <variant>
 
 #include "CommandSys.hpp"
+#include "ErrorHandler.hpp"
 
 void CommandSystem::add(std::string name, Command command) {
     commands.emplace(name, command);
@@ -12,9 +16,9 @@ CommandSystem::Command* CommandSystem::find (const std::string& name) {
     else return &it->second;
 }
 
-std::expected<std::vector<std::string>, std::string> CommandSystem::parse(std::string& cmd) {
+std::expected<std::vector<std::string>, Error> CommandSystem::parse(std::string& cmd) {
     //ignores all spaces, supports quoted strings
-    if (cmd.empty()) return std::unexpected("\'Mpty line PWA!\n");
+    if (cmd.empty()) return error(ParseError::EmptyLine);
     std::vector<std::string> a;
     std::string cur;
     bool iQuoted = false;
@@ -24,7 +28,7 @@ std::expected<std::vector<std::string>, std::string> CommandSystem::parse(std::s
             iQuoted = false; 
             a.push_back(cur); 
             cur.clear();
-            if (a.size() > 10) return std::unexpected("Hey! PWA DIZZY! TOO MANY ARGUMENTS\n");
+            if (a.size() > 10) return error(ParseError::TooManyArgs);
             continue;
         }
         if (c == '"') {iQuoted = true; continue;}
@@ -32,24 +36,36 @@ std::expected<std::vector<std::string>, std::string> CommandSystem::parse(std::s
         if (!cur.empty()) {
             a.push_back(cur);
             cur.clear();
-            if (a.size() > 10) return std::unexpected("Hey! PWA DIZZY! TOO MANY ARGUMENTS\n");
+            if (a.size() > 10) return error(ParseError::TooManyArgs);
         }
     }
     if (!cur.empty()) a.push_back(cur);
-    if (a.size() > 10) return std::unexpected("Hey! PWA DIZZY! TOO MANY ARGUMENTS\n");
+    if (a.size() > 10) return error(ParseError::TooManyArgs);
     return a;
 }
 
-std::expected<void, std::string> CommandSystem::run(std::string& cmd) {
+CommandSystem::State CommandSystem::run(std::string& cmd) {
     auto parseres = parse(cmd);
-    if (!parseres) return std::unexpected(parseres.error());
+    if (!parseres) {
+        ErrorHandler(parseres.error());
+        meta.logfail();
+        return Error;
+    }
     auto& args = parseres.value();
     auto check = find(args[0]);
-    if (!check) return std::unexpected("No such command exists!");
-    auto cmdrun = *check;
-    auto res = cmdrun(args);
-    if (!res) return std::unexpected(res.error());
-    meta.logcmd("ALL");
-    meta.logcmd(args[0]);
-    return {};
+    if (!check) {
+        ErrorHandler(NoSuchCmd{args[0]});
+        meta.logfail();
+        return Error;
+    }
+    auto res = (*check)(args);
+    if (res) {
+        meta.logcmd("ALL");
+        meta.logcmd(args[0]);
+        return Success;
+    }
+    if (std::holds_alternative<GameEnd>(res.error())) return Ending;
+    ErrorHandler(res.error());
+    meta.logfail();
+    return Error;
 }

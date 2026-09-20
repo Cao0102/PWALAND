@@ -18,9 +18,12 @@
 #include "Initialization.hpp"
 
 CommandSystem Initialization::setup_commands(Herd& pwaherd) {
-    CommandSystem cmdsys;
-    cmdsys.add("HLP", [&](auto& args) -> std::expected<void, std::string> {
-        if (args.size() != 1) return std::unexpected(util::Argnum_err(0, args.size()-1));
+    CommandSystem cmdsys; 
+
+    using command = std::expected<void, Error>;
+
+    cmdsys.add("HLP", [&](auto& args) -> command {
+        if (args.size() != 1) return error(ArgumentError{0, args.size()-1});
         std::print(R"(
 
 COMMANDS GUIDE
@@ -54,15 +57,15 @@ More coming soon! =)
         return {};
     });
 
-    cmdsys.add("MTD", [](auto& args) -> std::expected<void, std::string> {
-        if (args.size() != 1) return std::unexpected(util::Argnum_err(0, args.size()-1));
+    cmdsys.add("MTD", [](auto& args) -> command {
+        if (args.size() != 1) return error(ArgumentError{0, args.size()-1});
         meta.listout();
         return {};
     });
 
 
-    cmdsys.add("FAQ", [](auto& args) -> std::expected<void, std::string> {
-        if (args.size() != 1) return std::unexpected(util::Argnum_err(0, args.size()-1));
+    cmdsys.add("FAQ", [](auto& args) -> command {
+        if (args.size() != 1) return error(ArgumentError{0, args.size()-1});
         std::print (R"( 
 
 Frequently Asked Questions
@@ -94,14 +97,14 @@ More recently, parser was updated to ignore leading and trailing spaces to help 
         return {};
     });
 
-    cmdsys.add("FED", [&](auto& args) -> std::expected<void, std::string> {
-        if (args.size() != 3) return std::unexpected(util::Argnum_err(2, args.size()-1));
+    cmdsys.add("FED", [&](auto& args) -> command {
+        if (args.size() != 3) return error(ArgumentError{2, args.size()-1});
         std::string& targetname = args[1];
         Alpaca* pwatarg = pwaherd.findpwa(targetname);
-        if (!pwatarg) return std::unexpected(util::Nopwa_err());
+        if (!pwatarg) return error(NoSuchAlpaca{targetname});
 
         auto numres = util::parse_num(args[2]);
-        if (!numres) return std::unexpected(numres.error());
+        if (!numres) return error(numres.error());
         int amount = numres.value();
 
         auto working = pwatarg->feed(amount, pwaherd.getsize());
@@ -109,11 +112,11 @@ More recently, parser was updated to ignore leading and trailing spaces to help 
         return {};
     });
 
-    cmdsys.add("PWA", [&](auto& args) -> std::expected<void, std::string> {
-        if (args.size() != 3) return std::unexpected(util::Argnum_err(2, args.size()-1));
+    cmdsys.add("PWA", [&](auto& args) -> command {
+        if (args.size() != 3) return error(ArgumentError{2, args.size()-1});
         std::string targetname = args[1];
         Alpaca* pwatarg = pwaherd.findpwa(targetname);
-        if (!pwatarg) return std::unexpected(util::Nopwa_err());
+        if (!pwatarg) return error(NoSuchAlpaca{targetname});
 
         auto numres = util::parse_num(args[2]);
         if (!numres) return std::unexpected(numres.error());
@@ -122,31 +125,31 @@ More recently, parser was updated to ignore leading and trailing spaces to help 
         return {};
     });
 
-    cmdsys.add("PLY", [&](auto& args) -> std::expected<void, std::string> {
-        if (args.size() != 2) return std::unexpected(util::Argnum_err(1, args.size()-1));
+    cmdsys.add("PLY", [&](auto& args) -> command {
+        if (args.size() != 2) return error(ArgumentError{1, args.size()-1});
         std::string targetname = args[1];
         Alpaca* pwatarg = pwaherd.findpwa(targetname);
-        if (!pwatarg) return std::unexpected(util::Nopwa_err());
+        if (!pwatarg) return error(NoSuchAlpaca{targetname});
         auto res = player.coindown(10);
         if (!res) return std::unexpected(res.error());
         pwatarg->play();
         return {};
     });
 
-    cmdsys.add("INF", [&](auto& args) -> std::expected<void, std::string> {
-        if (args.size() != 2) return std::unexpected(util::Argnum_err(1, args.size()-1));
+    cmdsys.add("INF", [&](auto& args) -> command {
+        if (args.size() != 2) return error(ArgumentError{1, args.size()-1});
         std::string pwaname = args[1];
         auto it = pwaherd.findpwa(pwaname);
-        if (!it) return std::unexpected(util::Nopwa_err());
+        if (!it) return error(NoSuchAlpaca{pwaname});
         it->intro();
         return {};
     });
 
-    cmdsys.add("ADD", [&](auto& args) -> std::expected<void, std::string> {
-        if (args.size() != 2) return std::unexpected(util::Argnum_err(1, args.size()-1));
+    cmdsys.add("ADD", [&](auto& args) -> command {
+        if (args.size() != 2) return error(ArgumentError{1, args.size()-1});
         std::string pwaname = args[1];
         auto it = pwaherd.findpwa(pwaname);
-        if (it) return std::unexpected("That alpaca already exists!");
+        if (it) return error(AlpacaAlreadyExist{pwaname});
         long long cost = 25 + 15 * (pwaherd.getsize()-1);
         auto res = player.coindown(cost);
         if (!res) return std::unexpected(res.error());
@@ -156,38 +159,37 @@ More recently, parser was updated to ignore leading and trailing spaces to help 
         return {};
     });
 
-    cmdsys.add("BAL", [&](auto& args) -> std::expected<void, std::string> {
-        if (args.size() != 1) return std::unexpected(util::Argnum_err(0, args.size()-1));
+    cmdsys.add("BAL", [&](auto& args) -> command {
+        if (args.size() != 1) return error(ArgumentError{0, args.size()-1});
         long long balance = player.getBalance();
         std::print("Your balance is {} pwacoins\n", balance);
         return {};
     });
 
-    cmdsys.add("LNP", [&](auto& args) -> std::expected<void, std::string> {
-        if (args.size() != 1) return std::unexpected(util::Argnum_err(0, args.size()-1));
+    cmdsys.add("LNP", [&](auto& args) -> command {
+        if (args.size() != 1) return error(ArgumentError{0, args.size()-1});
         std::print("March! March! Pwa... Introduce!\nPwacount: {}!\n\n", pwaherd.getsize());
         pwaherd.intro();
         return {};
     });
 
-    cmdsys.add("ACH", [](auto& args) -> std::expected<void, std::string> {
-        if (args.size() != 1) return std::unexpected(util::Argnum_err(0, args.size()-1));
+    cmdsys.add("ACH", [](auto& args) -> command {
+        if (args.size() != 1) return error(ArgumentError{0, args.size()-1});
         std::print("\nPWA ACHIEVEMENTS!\n=======================================\n\n");
         Achievements.list_out();
         return {};
     });
 
-    cmdsys.add("AIF", [](auto& args) -> std::expected<void, std::string> {
-        //this one is a pain in hell
-        if (args.size() != 2) return std::unexpected(util::Argnum_err(1, args.size()-1));
+    cmdsys.add("AIF", [](auto& args) -> command {
+        if (args.size() != 2) return error(ArgumentError{1, args.size()-1});
         std::string target = args[1];
         auto res = Achievements.show(target);
         if (!res) return std::unexpected(res.error());
         return {};
     });
 
-    cmdsys.add("ADV", [](auto& args) -> std::expected<void, std::string> {
-        if (args.size() != 1) return std::unexpected(util::Argnum_err(0, args.size()-1));
+    cmdsys.add("ADV", [](auto& args) -> command {
+        if (args.size() != 1) return error(ArgumentError{0, args.size()-1});
         long long Entryfee = 100;
         int times = meta.getcmd("ADV");
         while(times--) Entryfee = Entryfee*21/20;
@@ -197,10 +199,10 @@ More recently, parser was updated to ignore leading and trailing spaces to help 
         return {};
     });
 
-    cmdsys.add("DLY", [&](auto& args) -> std::expected<void, std::string> {
-        if (args.size() != 1) return std::unexpected(util::Argnum_err(0, args.size()-1));
+    cmdsys.add("DLY", [&](auto& args) -> command {
+        if (args.size() != 1) return error(ArgumentError{0, args.size()-1});
         int lastDaily = meta.getlastdaily();
-        if (util::get_date() - lastDaily < 1) return std::unexpected("Awww you already take your daily rewards today...");
+        if (util::get_date() - lastDaily < 1) return error(AlreadyDaily{});
         int reward = util::w_rand<int, 100, 200, 300, 400>({220, 200, 150, 80});
         std::print("You got... {} PWACOINS! Come back tomorrow for more prices!\n", reward);
         player.coinup(reward);
@@ -208,9 +210,9 @@ More recently, parser was updated to ignore leading and trailing spaces to help 
         return {};
     });
 
-    cmdsys.add("DEV", [](auto& args) -> std::expected<void, std::string> {
+    cmdsys.add("DEV", [](auto& args) -> command {
         /// THIS COMMAND IS HIDDEN AND DELIBERATELY UNDOCUMENTED
-        if (args.size() != 1) return std::unexpected(util::Argnum_err(0, args.size()-1));
+        if (args.size() != 1) return error(ArgumentError{0, args.size()-1});
         std::print(R"(
 Oh... You are here? Interesting... Let's break away from the normal game for a moment and talk shall we?
 How did you find this?
@@ -238,13 +240,13 @@ Do you like it? [Y/N]
         return {};
     });
 
-    cmdsys.add("END", [&](auto& args) -> std::expected<void, std::string> {
-        if (args.size() != 1) return std::unexpected(util::Argnum_err(0, args.size()-1));
+    cmdsys.add("END", [&](auto& args) -> command {
+        if (args.size() != 1) return error(ArgumentError{0, args.size()-1});
         std::print("Pwa, goodbye that fast?\n");
-        return std::unexpected("Ending");
+        return error(GameEnd{});
     });
 
-    cmdsys.add("ADMIN", [&](auto& args) -> std::expected<void, std::string> {
+    cmdsys.add("ADMIN", [&](auto& args) -> command {
         if (args.size() == 2 && args[1] == "Save clear") {
             std::print("\n[ADMIN] Clearing save\nRecommend pwa to restart the game\n");
             std::filesystem::remove("save1.txt");

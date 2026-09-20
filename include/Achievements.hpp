@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "Metadata.hpp"
+#include "Error_types.hpp"
 
 namespace achievement_state {
     enum class Status {
@@ -43,7 +44,7 @@ public:
         std::vector<std::function<bool()>> cmd(const std::string& name, int amount);
     };
     void setup();
-    std::expected<void, std::string> show (std::string& name);
+    std::expected<void, Error> show (std::string& name);
     void list_out();
     void check();
     void save_sync();

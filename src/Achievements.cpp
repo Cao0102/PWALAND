@@ -94,10 +94,10 @@ void AchievementsManager::setup() {
     add( "PWA of a fighter!", "Level up alpacas more than 1000 times", req.lvl(1'000));
     add( "Tanky pwa, or pwa is a tank?", "Level up alpacas more than 10000 times", req.lvl(10'000));
 }
-std::expected<void, std::string> AchievementsManager::show (std::string& name) {
+std::expected<void, Error> AchievementsManager::show (std::string& name) {
     std::print("Searching for [{}]!\n", name);
     auto it = achievement_list.find(name);
-    if (it == achievement_list.end()) return std::unexpected("No such achievements\n");
+    if (it == achievement_list.end()) return std::unexpected(NoSuchAchievement{name});
     it->second.info();
     return {};
 }

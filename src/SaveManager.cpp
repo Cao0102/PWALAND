@@ -3,14 +3,15 @@
 #include <filesystem>
 
 #include "SaveManager.hpp"
+#include "ErrorHandler.hpp"
 
-std::expected<void, std::string> SaveManager::load(Herd& pwaherd) {
+std::expected<void, Error> SaveManager::load(Herd& pwaherd) {
     std::ifstream load("save1.txt");
 
     if (load.is_open()) {
         int SaveVInFile; int lastDaily;
         load >> SaveVInFile;
-        if (SaveVInFile != SAVE_VERSION) return std::unexpected("Save file version mismatch");
+        if (SaveVInFile != SAVE_VERSION) return error(InternalError::SaveVersionMismatch);
         load >> lastDaily;
         meta.loglastdaily(lastDaily);
         int nAlpacas;
@@ -21,7 +22,7 @@ std::expected<void, std::string> SaveManager::load(Herd& pwaherd) {
         meta.loadin(load);
         std::print("Pwa data recovered!\n");
     }
-    else return std::unexpected("Pwa... System error... Failed to load save file");
+    else return error(InternalError::SaveReadFailed);
 
     load.close();
     return {};
@@ -39,7 +40,7 @@ void SaveManager::save(Herd& pwaherd) {
         save.close();
         return;
     }
-    else std::print("Oops, we cannot open the safe file, this is an internal error, we are sorry pwa...\n");
+    else ErrorHandler(error(InternalError::SaveWriteFailed).error());
     save.close();
 }
 
@@ -51,7 +52,7 @@ void SaveManager::savecheck(Herd& pwaherd) {
             Achievements.save_sync();
             welcomer.welcome_back(pwaherd);
         }
-        else {std::print("Error: {}\nPerhaps this is an internal error, for now we can restart the game\n", load_result.error()); welcomer.welcome(pwaherd);}
+        else {ErrorHandler(load_result.error()); welcomer.welcome(pwaherd);}
     }
     else welcomer.welcome(pwaherd);
 }

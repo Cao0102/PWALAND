@@ -1,3 +1,3 @@
 #pragma once
 
-constexpr int SAVE_VERSION = 4;
+constexpr int SAVE_VERSION = 5;

@@ -41,7 +41,7 @@ void Alpaca::pwa(int times) {
     std::print("\n");
 }
 
-std::expected<void, std::string> Alpaca::feed(int times, int herdsz) {
+std::expected<void, Error> Alpaca::feed(int times, int herdsz) {
     long long cost;
     cost = meta.getlvl() + herdsz*5 - std::min(meta.getpwa()/50000, (long long) herdsz*3);
     auto res = player.coindown(cost);

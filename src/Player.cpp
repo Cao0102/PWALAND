@@ -4,8 +4,8 @@
 
 void Player::coinup(long long amount) {money += amount;}
 
-std::expected<void,std::string> Player::coindown (long long amount) {
-    if (money < amount) return std::unexpected(std::format("Not enough money pwa... You need {} more", amount-money));
+std::expected<void, Error> Player::coindown (ull amount) {
+    if (money < amount) return error(NoMoney{amount, money});
     money -= amount;
     return {};
 }

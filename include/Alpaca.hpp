@@ -2,6 +2,7 @@
 
 #include <string>
 #include <expected>
+#include "Error_types.hpp"
 
 
 class Alpaca {
@@ -17,7 +18,7 @@ class Alpaca {
     void determine_levelup();
     void setid(int newid);
     void pwa(int times);
-    std::expected<void, std::string> feed(int times, int herdsz);
+    std::expected<void, Error> feed(int times, int herdsz);
     void play();
     void intro();
     void restorepwa (int lid, int lpwatimes, int llevel, long long lxp);

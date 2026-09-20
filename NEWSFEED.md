@@ -1,6 +1,10 @@
 # NEWSFEED
 *This is where I put recent highlights in development of the game!*
 
+Se 20, 2026:
+Giant update =D  
+Took a while to implement the new error syste, hard as hell  
+
 Se 6, 2026:
 Long update =D  
 Could work more on major things soon

@@ -12,7 +12,7 @@
 
 class SaveManager {
 public:
-    std::expected<void, std::string> load(Herd& pwaherd);
+    std::expected<void, Error> load(Herd& pwaherd);
     void save(Herd& pwaherd);
     void savecheck(Herd& pwaherd);
 };

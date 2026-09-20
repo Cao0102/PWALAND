@@ -7,6 +7,7 @@
 #include "AlpacaHerd.hpp"
 #include "Initialization.hpp"
 #include "SaveManager.hpp"
+#include "Error_types.hpp"
 
 class PWALAND {
     Herd pwaherd;
@@ -31,14 +32,9 @@ public:
         int time_of_day = 0;
         std::print("\nUSER_COMMAND > ");
         while(std::getline(std::cin, cmdline)) {
-            auto res = cmdsys.run(cmdline);
-            if (!res) {
-                std::string error_msg = res.error();
-                if (error_msg == "Ending") break;
-                meta.logfail();
-                std::print("{}\n",error_msg);
-            }
-            else {
+            CommandSystem::State res = cmdsys.run(cmdline);
+            if (res == CommandSystem::State::Ending) break;
+            else if (res == CommandSystem::State::Success) {
                 time_of_day++;
                 time_of_day %= 5;
                 if (time_of_day == 0) day_ends();
