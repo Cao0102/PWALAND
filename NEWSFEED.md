@@ -1,6 +1,10 @@
 # NEWSFEED
 *This is where I put recent highlights in development of the game!*
 
+Oct 2, 2026:
+Right now I am experimenting with several things like modules or json  
+Will be a while  
+
 Se 20, 2026:
 Giant update =D  
 Took a while to implement the new error syste, hard as hell  

@@ -32,6 +32,11 @@ add_executable(PWALAND
 
 target_include_directories(PWALAND PRIVATE include)
 
+target_compile_options(
+    PWALAND PRIVATE
+    -fmodules
+)
+
 target_link_libraries(
     PWALAND PRIVATE
     stdc++exp
