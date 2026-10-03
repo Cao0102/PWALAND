@@ -139,7 +139,9 @@ The `ADMIN` command takes a non fixed amount of arguments and follow a fixed sch
 `ADMIN "Save clear"`, delete the save currently loaded without going through the usual pathway  
 
 ## IMPLEMENTATION OVERVIEW
-*These are specific implementation overview of the system*  
+*These are specific implementation overview of the system*
+
+**IMPORTANT: DUE TO THE RECENT ERROR HANDLING SYSTEM AND THE FUTURE MODULES AND SAVE FILE CHANGE, THE FOLLOWING PARTS *MAY* BE OUTDATED AND IS CONSTANTLY SUBJECT TO CHANGE**   
 
 **Setup and loading**
 - The program initializes by loading save file `save1.txt`, if this file does not exist then the run will be considered new.
