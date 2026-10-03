@@ -6,7 +6,7 @@
 
 class Onboarding {
 public:
-    void welcome(Herd& pwaherd);
-    void welcome_back(Herd& pwaherd);
+	void welcome(Herd& pwaherd);
+	void welcome_back(Herd& pwaherd);
 };
 extern Onboarding welcomer;

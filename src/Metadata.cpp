@@ -2,42 +2,42 @@
 
 long long& Gamedata::log(const std::string& category, const std::string& entry) {return metadata[category][entry];}
 long long Gamedata::see(const std::string& category, const std::string& entry) const {
-    auto it = metadata.find(category);
-    if (it == metadata.end()) return 0;
-    auto it2 = it->second.find(entry);
-    if (it2 == it->second.end()) return 0;
-    return it2->second;
+	auto it = metadata.find(category);
+	if (it == metadata.end()) return 0;
+	auto it2 = it->second.find(entry);
+	if (it2 == it->second.end()) return 0;
+	return it2->second;
 }
 void Gamedata::printout (std::ofstream& out) const {
-    std::print(out, "{}\n", metadata.size());
-    for (auto& [cate_name, category] : metadata) {
-        std::print(out, "{} {}\n", cate_name, category.size());
-        for (auto& [entry_name,amount] : category) std::print(out, "{} {}\n", entry_name, amount);
-    }
+	std::print(out, "{}\n", metadata.size());
+	for (auto& [cate_name, category] : metadata) {
+		std::print(out, "{} {}\n", cate_name, category.size());
+		for (auto& [entry_name,amount] : category) std::print(out, "{} {}\n", entry_name, amount);
+	}
 }
 void Gamedata::readin(std::ifstream& in) {
-    int Category_count;
-    std::string Category;
-    int Entry_count;
-    std::string Entry;
-    long long Entry_Val;
-    in >> Category_count;
-    for (auto _ : std::views::iota(0, Category_count)) {
-        in >> Category >> Entry_count;
-        for (auto _ : std::views::iota(0, Entry_count)) {
-            in >> Entry >> Entry_Val;
-            metadata[Category][Entry] = Entry_Val;
-        }
-    }
+	int Category_count;
+	std::string Category;
+	int Entry_count;
+	std::string Entry;
+	long long Entry_Val;
+	in >> Category_count;
+	for (auto _ : std::views::iota(0, Category_count)) {
+		in >> Category >> Entry_count;
+		for (auto _ : std::views::iota(0, Entry_count)) {
+			in >> Entry >> Entry_Val;
+			metadata[Category][Entry] = Entry_Val;
+		}
+	}
 }
 void Gamedata::list() {
-    std::print("\n\nPWA HERE IS YOUR METADATA\n===================================\n");
-    std::print("\n1. Commands usage\n");
-    for (auto& [name, amount] : metadata[categories::cmd]) std::print("{}: {}\n", name, amount);
-    std::print("\n2. Alpaca stats\n");
-    for (auto& [name, amount] : metadata[categories::pwa]) std::print("Your alpacas had {}-ed {} times!\n", name, amount);
-    std::print("\n3. Exotic stats\n");
-    for (auto& [name, amount] : metadata[categories::spc]) std::print("{}: {}\n", name, amount);
+	std::print("\n\nPWA HERE IS YOUR METADATA\n===================================\n");
+	std::print("\n1. Commands usage\n");
+	for (auto& [name, amount] : metadata[categories::cmd]) std::print("{}: {}\n", name, amount);
+	std::print("\n2. Alpaca stats\n");
+	for (auto& [name, amount] : metadata[categories::pwa]) std::print("Your alpacas had {}-ed {} times!\n", name, amount);
+	std::print("\n3. Exotic stats\n");
+	for (auto& [name, amount] : metadata[categories::spc]) std::print("{}: {}\n", name, amount);
 }
 
 void GameAbstract::logpwa(const int x) { mtd.log(categories::pwa, "pwa") += x; }

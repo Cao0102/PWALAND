@@ -4,8 +4,8 @@
 #include "Utilities.hpp"
 
 class Gameplay {
-    // This class contains the special gameplay elements that are not significant enough to have a seperate class
+	// This class contains the special gameplay elements that are not significant enough to have a seperate class
 public:
-    void adventure(long long Entry);
+	void adventure(long long Entry);
 };
 inline Gameplay games;

@@ -3,8 +3,8 @@
 #include "SaveManager.hpp"
 
 void Initialization::run(CommandSystem& cmdsys, Herd& Alpacaherd) {
-    cmdsys = setup_commands(Alpacaherd);
-    Achievements.setup();
-    Save.savecheck(Alpacaherd);
+	cmdsys = setup_commands(Alpacaherd);
+	Achievements.setup();
+	Save.savecheck(Alpacaherd);
 }
 Initialization setup;

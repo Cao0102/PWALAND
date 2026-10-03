@@ -12,8 +12,8 @@
 
 class SaveManager {
 public:
-    std::expected<void, Error> load(Herd& pwaherd);
-    void save(Herd& pwaherd);
-    void savecheck(Herd& pwaherd);
+	std::expected<void, Error> load(Herd& pwaherd);
+	void save(Herd& pwaherd);
+	void savecheck(Herd& pwaherd);
 };
 extern SaveManager Save;

@@ -18,13 +18,13 @@
 #include "Initialization.hpp"
 
 CommandSystem Initialization::setup_commands(Herd& pwaherd) {
-    CommandSystem cmdsys; 
+	CommandSystem cmdsys; 
 
-    using command = std::expected<void, Error>;
+	using command = std::expected<void, Error>;
 
-    cmdsys.add("HLP", [&](auto& args) -> command {
-        if (args.size() != 1) return error(ArgumentError{0, args.size()-1});
-        std::print(R"(
+	cmdsys.add("HLP", [&](auto& args) -> command {
+		if (args.size() != 1) return error(ArgumentError{0, args.size()-1});
+		std::print(R"(
 
 COMMANDS GUIDE
 ----------------------------------
@@ -54,19 +54,19 @@ ADV - Play an all-or-nothing game answering series of questions for a big prize
 
 More coming soon! =)
 )");
-        return {};
-    });
+		return {};
+	});
 
-    cmdsys.add("MTD", [](auto& args) -> command {
-        if (args.size() != 1) return error(ArgumentError{0, args.size()-1});
-        meta.listout();
-        return {};
-    });
+	cmdsys.add("MTD", [](auto& args) -> command {
+		if (args.size() != 1) return error(ArgumentError{0, args.size()-1});
+		meta.listout();
+		return {};
+	});
 
 
-    cmdsys.add("FAQ", [](auto& args) -> command {
-        if (args.size() != 1) return error(ArgumentError{0, args.size()-1});
-        std::print (R"( 
+	cmdsys.add("FAQ", [](auto& args) -> command {
+		if (args.size() != 1) return error(ArgumentError{0, args.size()-1});
+		std::print (R"( 
 
 Frequently Asked Questions
 ==================================
@@ -94,165 +94,165 @@ The program will show "Searching for: [Your_Input]" to help
 More recently, parser was updated to ignore leading and trailing spaces to help safer parsing
 
 )");
-        return {};
-    });
+		return {};
+	});
 
-    cmdsys.add("FED", [&](auto& args) -> command {
-        if (args.size() != 3) return error(ArgumentError{2, args.size()-1});
-        std::string& targetname = args[1];
-        Alpaca* pwatarg = pwaherd.findpwa(targetname);
-        if (!pwatarg) return error(NoSuchAlpaca{targetname});
+	cmdsys.add("FED", [&](auto& args) -> command {
+		if (args.size() != 3) return error(ArgumentError{2, args.size()-1});
+		std::string& targetname = args[1];
+		Alpaca* pwatarg = pwaherd.findpwa(targetname);
+		if (!pwatarg) return error(NoSuchAlpaca{targetname});
 
-        auto numres = util::parse_num(args[2]);
-        if (!numres) return error(numres.error());
-        int amount = numres.value();
+		auto numres = util::parse_num(args[2]);
+		if (!numres) return error(numres.error());
+		int amount = numres.value();
 
-        auto working = pwatarg->feed(amount, pwaherd.getsize());
-        if (!working) return std::unexpected(working.error());
-        return {};
-    });
+		auto working = pwatarg->feed(amount, pwaherd.getsize());
+		if (!working) return std::unexpected(working.error());
+		return {};
+	});
 
-    cmdsys.add("PWA", [&](auto& args) -> command {
-        if (args.size() != 3) return error(ArgumentError{2, args.size()-1});
-        std::string targetname = args[1];
-        Alpaca* pwatarg = pwaherd.findpwa(targetname);
-        if (!pwatarg) return error(NoSuchAlpaca{targetname});
+	cmdsys.add("PWA", [&](auto& args) -> command {
+		if (args.size() != 3) return error(ArgumentError{2, args.size()-1});
+		std::string targetname = args[1];
+		Alpaca* pwatarg = pwaherd.findpwa(targetname);
+		if (!pwatarg) return error(NoSuchAlpaca{targetname});
 
-        auto numres = util::parse_num(args[2]);
-        if (!numres) return std::unexpected(numres.error());
-        int times = numres.value();
-        pwatarg->pwa(times);
-        return {};
-    });
+		auto numres = util::parse_num(args[2]);
+		if (!numres) return std::unexpected(numres.error());
+		int times = numres.value();
+		pwatarg->pwa(times);
+		return {};
+	});
 
-    cmdsys.add("PLY", [&](auto& args) -> command {
-        if (args.size() != 2) return error(ArgumentError{1, args.size()-1});
-        std::string targetname = args[1];
-        Alpaca* pwatarg = pwaherd.findpwa(targetname);
-        if (!pwatarg) return error(NoSuchAlpaca{targetname});
-        auto res = player.coindown(10);
-        if (!res) return std::unexpected(res.error());
-        pwatarg->play();
-        return {};
-    });
+	cmdsys.add("PLY", [&](auto& args) -> command {
+		if (args.size() != 2) return error(ArgumentError{1, args.size()-1});
+		std::string targetname = args[1];
+		Alpaca* pwatarg = pwaherd.findpwa(targetname);
+		if (!pwatarg) return error(NoSuchAlpaca{targetname});
+		auto res = player.coindown(10);
+		if (!res) return std::unexpected(res.error());
+		pwatarg->play();
+		return {};
+	});
 
-    cmdsys.add("INF", [&](auto& args) -> command {
-        if (args.size() != 2) return error(ArgumentError{1, args.size()-1});
-        std::string pwaname = args[1];
-        auto it = pwaherd.findpwa(pwaname);
-        if (!it) return error(NoSuchAlpaca{pwaname});
-        it->intro();
-        return {};
-    });
+	cmdsys.add("INF", [&](auto& args) -> command {
+		if (args.size() != 2) return error(ArgumentError{1, args.size()-1});
+		std::string pwaname = args[1];
+		auto it = pwaherd.findpwa(pwaname);
+		if (!it) return error(NoSuchAlpaca{pwaname});
+		it->intro();
+		return {};
+	});
 
-    cmdsys.add("ADD", [&](auto& args) -> command {
-        if (args.size() != 2) return error(ArgumentError{1, args.size()-1});
-        std::string pwaname = args[1];
-        auto it = pwaherd.findpwa(pwaname);
-        if (it) return error(AlpacaAlreadyExist{pwaname});
-        long long cost = 25 + 15 * (pwaherd.getsize()-1);
-        auto res = player.coindown(cost);
-        if (!res) return std::unexpected(res.error());
-        std::print("Adding alpaca {} into your herd!\n\n", pwaname);
-        pwaherd.addpwa(pwaname).setid(pwaherd.getsize());
-        std::print("\nThe herd continues to grow\nYou now have {} alpacas!\n", pwaherd.getsize());
-        return {};
-    });
+	cmdsys.add("ADD", [&](auto& args) -> command {
+		if (args.size() != 2) return error(ArgumentError{1, args.size()-1});
+		std::string pwaname = args[1];
+		auto it = pwaherd.findpwa(pwaname);
+		if (it) return error(AlpacaAlreadyExist{pwaname});
+		long long cost = 25 + 15 * (pwaherd.getsize()-1);
+		auto res = player.coindown(cost);
+		if (!res) return std::unexpected(res.error());
+		std::print("Adding alpaca {} into your herd!\n\n", pwaname);
+		pwaherd.addpwa(pwaname).setid(pwaherd.getsize());
+		std::print("\nThe herd continues to grow\nYou now have {} alpacas!\n", pwaherd.getsize());
+		return {};
+	});
 
-    cmdsys.add("BAL", [&](auto& args) -> command {
-        if (args.size() != 1) return error(ArgumentError{0, args.size()-1});
-        long long balance = player.getBalance();
-        std::print("Your balance is {} pwacoins\n", balance);
-        return {};
-    });
+	cmdsys.add("BAL", [&](auto& args) -> command {
+		if (args.size() != 1) return error(ArgumentError{0, args.size()-1});
+		long long balance = player.getBalance();
+		std::print("Your balance is {} pwacoins\n", balance);
+		return {};
+	});
 
-    cmdsys.add("LNP", [&](auto& args) -> command {
-        if (args.size() != 1) return error(ArgumentError{0, args.size()-1});
-        std::print("March! March! Pwa... Introduce!\nPwacount: {}!\n\n", pwaherd.getsize());
-        pwaherd.intro();
-        return {};
-    });
+	cmdsys.add("LNP", [&](auto& args) -> command {
+		if (args.size() != 1) return error(ArgumentError{0, args.size()-1});
+		std::print("March! March! Pwa... Introduce!\nPwacount: {}!\n\n", pwaherd.getsize());
+		pwaherd.intro();
+		return {};
+	});
 
-    cmdsys.add("ACH", [](auto& args) -> command {
-        if (args.size() != 1) return error(ArgumentError{0, args.size()-1});
-        std::print("\nPWA ACHIEVEMENTS!\n=======================================\n\n");
-        Achievements.list_out();
-        return {};
-    });
+	cmdsys.add("ACH", [](auto& args) -> command {
+		if (args.size() != 1) return error(ArgumentError{0, args.size()-1});
+		std::print("\nPWA ACHIEVEMENTS!\n=======================================\n\n");
+		Achievements.list_out();
+		return {};
+	});
 
-    cmdsys.add("AIF", [](auto& args) -> command {
-        if (args.size() != 2) return error(ArgumentError{1, args.size()-1});
-        std::string target = args[1];
-        auto res = Achievements.show(target);
-        if (!res) return std::unexpected(res.error());
-        return {};
-    });
+	cmdsys.add("AIF", [](auto& args) -> command {
+		if (args.size() != 2) return error(ArgumentError{1, args.size()-1});
+		std::string target = args[1];
+		auto res = Achievements.show(target);
+		if (!res) return std::unexpected(res.error());
+		return {};
+	});
 
-    cmdsys.add("ADV", [](auto& args) -> command {
-        if (args.size() != 1) return error(ArgumentError{0, args.size()-1});
-        long long Entryfee = 100;
-        int times = meta.getcmd("ADV");
-        while(times--) Entryfee = Entryfee*21/20;
-        auto result = player.coindown(Entryfee);
-        if (!result) return std::unexpected(result.error());
-        games.adventure(Entryfee);
-        return {};
-    });
+	cmdsys.add("ADV", [](auto& args) -> command {
+		if (args.size() != 1) return error(ArgumentError{0, args.size()-1});
+		long long Entryfee = 100;
+		int times = meta.getcmd("ADV");
+		while(times--) Entryfee = Entryfee*21/20;
+		auto result = player.coindown(Entryfee);
+		if (!result) return std::unexpected(result.error());
+		games.adventure(Entryfee);
+		return {};
+	});
 
-    cmdsys.add("DLY", [&](auto& args) -> command {
-        if (args.size() != 1) return error(ArgumentError{0, args.size()-1});
-        int lastDaily = meta.getlastdaily();
-        if (util::get_date() - lastDaily < 1) return error(AlreadyDaily{});
-        int reward = util::w_rand<int, 100, 200, 300, 400>({220, 200, 150, 80});
-        std::print("You got... {} PWACOINS! Come back tomorrow for more prices!\n", reward);
-        player.coinup(reward);
-        meta.loglastdaily(util::get_date());
-        return {};
-    });
+	cmdsys.add("DLY", [&](auto& args) -> command {
+		if (args.size() != 1) return error(ArgumentError{0, args.size()-1});
+		int lastDaily = meta.getlastdaily();
+		if (util::get_date() - lastDaily < 1) return error(AlreadyDaily{});
+		int reward = util::w_rand<int, 100, 200, 300, 400>({220, 200, 150, 80});
+		std::print("You got... {} PWACOINS! Come back tomorrow for more prices!\n", reward);
+		player.coinup(reward);
+		meta.loglastdaily(util::get_date());
+		return {};
+	});
 
-    cmdsys.add("DEV", [](auto& args) -> command {
-        /// THIS COMMAND IS HIDDEN AND DELIBERATELY UNDOCUMENTED
-        if (args.size() != 1) return error(ArgumentError{0, args.size()-1});
-        std::print(R"(
+	cmdsys.add("DEV", [](auto& args) -> command {
+		/// THIS COMMAND IS HIDDEN AND DELIBERATELY UNDOCUMENTED
+		if (args.size() != 1) return error(ArgumentError{0, args.size()-1});
+		std::print(R"(
 Oh... You are here? Interesting... Let's break away from the normal game for a moment and talk shall we?
 How did you find this?
 [Someone told me/By accident/I datamined it]
 > )");
-        std::string response;
-        std::getline(std::cin, response);
-        if (response == "Someone told me") std::print("Fair enough\n");
-        else if (response == "By accident") std::print("Accident? That's sus...\n");
-        else if (response == "I datamined it") std::print("...\nOf course....\nNot... suprising at all...\n");
-        else std::print("Despite everything, you didn't follow the very clear written instructions.... \nYou are not my QA\n");
-        std::print(R"(
+		std::string response;
+		std::getline(std::cin, response);
+		if (response == "Someone told me") std::print("Fair enough\n");
+		else if (response == "By accident") std::print("Accident? That's sus...\n");
+		else if (response == "I datamined it") std::print("...\nOf course....\nNot... suprising at all...\n");
+		else std::print("Despite everything, you didn't follow the very clear written instructions.... \nYou are not my QA\n");
+		std::print(R"(
 Whatever that was... Should it matter?
 After all... this is my game to discover
 A first project I am dedicated in...
 So...
 Do you like it? [Y/N]
 > )");
-        while(std::getline(std::cin, response)) {
-            if (response == "Y") {std::print("Thank you, may you keep playing as happy\n"); break;}
-            else if (response == "N") std::print("Wrong answer, try again\n");
-            else std::print("As I said, you are not my QA >:( stop sending unfun responses\n> ");
-        }
-        std::print("I guess... Bye!\n");
-        return {};
-    });
+		while(std::getline(std::cin, response)) {
+			if (response == "Y") {std::print("Thank you, may you keep playing as happy\n"); break;}
+			else if (response == "N") std::print("Wrong answer, try again\n");
+			else std::print("As I said, you are not my QA >:( stop sending unfun responses\n> ");
+		}
+		std::print("I guess... Bye!\n");
+		return {};
+	});
 
-    cmdsys.add("END", [&](auto& args) -> command {
-        if (args.size() != 1) return error(ArgumentError{0, args.size()-1});
-        std::print("Pwa, goodbye that fast?\n");
-        return error(GameEnd{});
-    });
+	cmdsys.add("END", [&](auto& args) -> command {
+		if (args.size() != 1) return error(ArgumentError{0, args.size()-1});
+		std::print("Pwa, goodbye that fast?\n");
+		return error(GameEnd{});
+	});
 
-    cmdsys.add("ADMIN", [&](auto& args) -> command {
-        if (args.size() == 2 && args[1] == "Save clear") {
-            std::print("\n[ADMIN] Clearing save\nRecommend pwa to restart the game\n");
-            std::filesystem::remove("save1.txt");
-        }
-        else {
-            std::print(R"(
+	cmdsys.add("ADMIN", [&](auto& args) -> command {
+		if (args.size() == 2 && args[1] == "Save clear") {
+			std::print("\n[ADMIN] Clearing save\nRecommend pwa to restart the game\n");
+			std::filesystem::remove("save1.txt");
+		}
+		else {
+			std::print(R"(
 Pwa... No such admin command exists
 Here are the existing commands!
 
@@ -260,9 +260,9 @@ ADMIN "Save clear"
 With double quotes!
 Clear the save without having to go through the normal pathway
 )");
-        }
-        return {};
-    });
+		}
+		return {};
+	});
 
-    return cmdsys;
+	return cmdsys;
 }
