@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.28)
 
 project(PWALAND)
 
@@ -6,6 +6,9 @@ set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(FetchContent)
+
+# Potentially unused for now.
+set(NLOHMANN_JSON_BUILD_MODULES ON)
 
 FetchContent_Declare(
     nlohmann_json
@@ -31,11 +34,6 @@ add_executable(PWALAND
 )
 
 target_include_directories(PWALAND PRIVATE include)
-
-target_compile_options(
-    PWALAND PRIVATE
-    -fmodules
-)
 
 target_link_libraries(
     PWALAND PRIVATE

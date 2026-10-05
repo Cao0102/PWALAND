@@ -32,7 +32,7 @@ The entirety of the code is written in C++26
 ## How to compile this?
 Requirements:
 - **Compiler with C++26 support**. This is actually crucial, the code uses elements only available under the C++26 language standard.
-- **CMake 3.20 or newer**  
+- **CMake 3.28 or newer**  
 Instructions:  
 - Build in CMake, either through your editor's extension or through terminal
 - Run the file through the executable directly or through your code editor of choice
