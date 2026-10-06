@@ -1,10 +1,9 @@
-#include <print>
 #include <string>
-#include <utility>
 #include <variant>
 
 #include "CommandSys.hpp"
 #include "ErrorHandler.hpp"
+#include "Metadata.hpp"
 
 void CommandSystem::add(std::string name, Command command) {
 	commands.emplace(name, command);

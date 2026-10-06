@@ -5,6 +5,7 @@
 #include "Error_types.hpp"
 
 
+
 class Alpaca {
 	int pwaid = 0;
 	int pwatimes = 0;

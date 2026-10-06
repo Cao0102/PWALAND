@@ -5,6 +5,7 @@
 #include <print>
 
 #include "Achievements.hpp"
+#include "Metadata.hpp"
 
 Achievement::Achievement(std::string n, std::string d, std::vector<std::function<bool()>> c) : name(std::move(n)), description(std::move(d)), condition(std::move(c)) {};
 achievement_state::Status Achievement::evaluate() {

@@ -51,7 +51,7 @@ target_sources(
     PRIVATE
         FILE_SET CXX_MODULES
         FILES
-            #
+            modules/Error_types.cppm
 )
 
 target_include_directories(PWALAND PRIVATE include)

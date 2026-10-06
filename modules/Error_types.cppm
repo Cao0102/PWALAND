@@ -1,9 +1,12 @@
-#pragma once
+module;
 
 #include <variant>
 #include <string>
 #include <expected>
 
+export module error_t;
+
+export {
 struct InternalError {
 	enum Type {
 		SaveCorrupt,
@@ -80,6 +83,7 @@ using Error = std::variant<
 	AlreadyDaily,
 	GameEnd
 >;
+}
 
 template <typename T>
 struct error_type {
@@ -104,6 +108,7 @@ struct error_type <ParseError::Type> {
 template<typename T>
 using error_type_t = typename error_type<T>::Errtype;
 
+export
 template <typename T>
 constexpr std::unexpected<Error> error (T x) {
 	return std::unexpected(Error{error_type_t<T>{x}});

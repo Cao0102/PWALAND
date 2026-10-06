@@ -6,7 +6,6 @@
 #include <vector>
 #include <unordered_map>
 
-#include "Metadata.hpp"
 #include "Error_types.hpp"
 
 class CommandSystem {

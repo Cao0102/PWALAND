@@ -1,10 +1,8 @@
-#include <format>
-
 #include "Player.hpp"
 
 void Player::coinup(long long amount) {money += amount;}
 
-std::expected<void, Error> Player::coindown (ull amount) {
+std::expected<void, Error> Player::coindown (unsigned long long amount) {
 	if (money < amount) return error(NoMoney{amount, money});
 	money -= amount;
 	return {};

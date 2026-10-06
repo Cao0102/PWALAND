@@ -6,7 +6,6 @@
 #include <expected>
 #include <vector>
 
-#include "Metadata.hpp"
 #include "Error_types.hpp"
 
 namespace achievement_state {

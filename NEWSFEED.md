@@ -2,7 +2,8 @@
 *This is where I put recent highlights in development of the game!*
 
 Oct 6, 2026:
-Finally got my first stable module configuration yay  /
+Finally got my first stable module configuration yay  
+I also migrated Error_types.cpp
 
 Oct 2, 2026:
 Right now I am experimenting with several things like modules or json  

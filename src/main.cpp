@@ -9,7 +9,6 @@
 #include "AlpacaHerd.hpp"
 #include "Initialization.hpp"
 #include "SaveManager.hpp"
-#include "Error_types.hpp"
 
 class PWALAND {
 	Herd pwaherd;

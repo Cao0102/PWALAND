@@ -5,13 +5,13 @@
 #include <limits>
 #include <expected>
 #include <random>
-#include <format>
 #include <charconv>
 #include <chrono>
 #include <thread>
 #include <array>
 #include <ranges>
 #include <cassert>
+#include <utility>
 
 #include "Error_types.hpp"
 
@@ -61,5 +61,6 @@ namespace util {
 		constexpr std::array w = {W...};
 		for (int index : std::views::iota(0, to<int>(w.size()))) if ((result -= w[index]) <= 0) return a[index];
 		assert(false);
+		std::unreachable();
 	}
 }
