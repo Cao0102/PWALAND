@@ -1,7 +1,15 @@
 {
     "C_Cpp.default.compilerPath": "C:/msys64/ucrt64/bin/g++.exe",
+    "C_Cpp.intelliSenseEngine": "disabled",
+
+    "clangd.path": "C:/msys64/ucrt64/bin/clangd.exe",
+    "clangd.arguments": [
+        "--compile-commands-dir=C:/Users/aser/Documents/GitHub/PWALAND/build",
+        "--experimental-modules-support"
+    ],
+
     "cmake.automaticReconfigure": true,
     "cmake.debugConfig": {
         "externalConsole": true
-    },
+    }
 }
