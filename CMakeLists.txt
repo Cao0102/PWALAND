@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.28)
 
+# Unused for now
+set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD
+    "f35a9ac6-8463-4d38-8eec-5d6008153e7d"
+)
+
 project(PWALAND)
 
 set(CMAKE_CXX_STANDARD 26)
@@ -31,6 +36,22 @@ add_executable(PWALAND
     src/SaveManager.cpp
     src/CommandLoader.cpp
     src/Setup.cpp
+)
+
+# Unused for now
+# Until GCC fix their bug
+# Turn CXX_MODULE_STD on when use
+set_property(
+    TARGET PWALAND
+    PROPERTY CXX_MODULE_STD OFF
+)
+
+target_sources(
+    PWALAND
+    PRIVATE
+        FILE_SET CXX_MODULES
+        FILES
+            #
 )
 
 target_include_directories(PWALAND PRIVATE include)

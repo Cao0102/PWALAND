@@ -3,6 +3,8 @@
 #include <format>
 #include <iostream>
 
+//import sacrificial_alpaca;
+
 #include "CommandSys.hpp"
 #include "AlpacaHerd.hpp"
 #include "Initialization.hpp"
@@ -52,6 +54,7 @@ public:
 };
 
 int main() {
+	//alpaca();
 	PWALAND game;
 	game.start();
 }

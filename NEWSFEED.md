@@ -1,6 +1,9 @@
 # NEWSFEED
 *This is where I put recent highlights in development of the game!*
 
+Oct 6, 2026:
+Finally got my first stable module configuration yay  /
+
 Oct 2, 2026:
 Right now I am experimenting with several things like modules or json  
 Will be a while  
