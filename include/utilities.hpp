@@ -8,10 +8,8 @@
 #include <charconv>
 #include <chrono>
 #include <thread>
-#include <array>
-#include <ranges>
 #include <cassert>
-#include <utility>
+#include <ranges> //ignore this warning
 
 #include "Error_types.hpp"
 
@@ -52,6 +50,16 @@ namespace util {
 		if (value < 0) return error(InvalidNumber::Negative);
 		if (value == 0) return error(InvalidNumber::Zero);
 		return value;
+	}
+	
+	template<std::integral T, std::integral V> 
+	constexpr auto range_of(T a, V b) 
+	{
+		static_assert(a >= 0);
+		static_assert(b >= 0);
+		auto x = static_cast<unsigned long long>(a);
+		auto y = static_cast<unsigned long long>(b);
+		return std::views::iota(x, y);
 	}
 	
 	template <typename T, int... W>

@@ -39,7 +39,7 @@ add_executable(PWALAND
 )
 
 # Unused for now
-# Until GCC fix their bug
+# Until GCC fix their import std
 # Turn CXX_MODULE_STD on when use
 set_property(
     TARGET PWALAND
@@ -52,6 +52,7 @@ target_sources(
         FILE_SET CXX_MODULES
         FILES
             modules/Error_types.cppm
+            modules/utilities.cppm
 )
 
 target_include_directories(PWALAND PRIVATE include)
